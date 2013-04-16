@@ -118,7 +118,7 @@ private:
     std::vector<Data> datas;
 };
 //--------------------------------------------------------------------------
-char* GetCodeDisplay(Inst &inst);
+std::string GetCodeDisplay(Inst &inst);
 std::string GetCodeType(Inst &inst);
 //--------------------------------------------------------------------------
 

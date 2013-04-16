@@ -187,7 +187,7 @@ Inst &DecSLTI(std::string inststr, Inst &inst)
     return DecSpecialAI(inststr, inst);
 }
 
-char* GetCodeDisplay(Inst &inst)
+std::string GetCodeDisplay(Inst &inst)
 {
     char tmp[100] = {0};
     std::stringstream ss;
@@ -237,7 +237,9 @@ char* GetCodeDisplay(Inst &inst)
             break;
     }
 
-    return tmp;
+	ss<<tmp;
+	
+    return ss.str();
 }
 
 std::string GetCodeType(Inst &inst)
@@ -585,11 +587,11 @@ int InstDecoder::Output(std::string fileName)
             }
             
             outstream << insts[i].address << '\t' << typestr[insts[i].type].c_str() <<' '
-            << (insts[i].type==-1?"":(std::string)GetCodeDisplay(insts[i])) << std::endl;
+            << ((insts[i].type==-1)? "" : GetCodeDisplay(insts[i])) << std::endl;
             
 #ifdef TEST
             std::cout << insts[i].address << '\t' << typestr[insts[i].type].c_str() <<' '
-                      << (insts[i].type==-1?"":(std::string)GetCodeDisplay(insts[i])) << std::endl;
+                      << ((insts[i].type==-1)? "" : GetCodeDisplay(insts[i])) << std::endl;
             //printf("%d\t%s %s\n", insts[i].address, typestr[insts[i].type].c_str(), insts[i].type==-1?"":GetCodeDisplay(insts[i]));
 #endif
         }
