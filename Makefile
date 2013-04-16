@@ -1,4 +1,4 @@
-CC=c++
+CC=g++
 CFLAGS=-c -Wall
 LDFLAGS=
 SOURCES=main.cpp instDecoder.cpp instSimulator.cpp
