@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
+#include <memory.h>
 //--------------------------------------------------------------------------
 const int ADDBASE       = 64;
 const int INSTLENGTH    = 32;
