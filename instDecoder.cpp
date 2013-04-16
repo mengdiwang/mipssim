@@ -293,7 +293,7 @@ int InstDecoder::Decode(const char *inFile)
 
 int InstDecoder::ParseFile(std::string inFile)
 {
-    std::ifstream instream(inFile);
+    std::ifstream instream(inFile.c_str());
     std::string line;
     int address = ADDBASE;
     
@@ -659,11 +659,9 @@ int InstDecoder::AddC2type(std::string inststr, Inst &inst, short &valid)
 int instoffset[6] = {0, 6, 11, 16, 21, 26};
 int instlen [6] ={6,5,5,5,5,6};
 
-int InstDecoder::Output(const char* outFile)
+int InstDecoder::Output(std::string fileName)
 {
-    std::string fileName = (std::string)outFile;
-    
-    std::ofstream outstream(fileName);
+    std::ofstream outstream(fileName.c_str());
 
     if(outstream.is_open())
     {

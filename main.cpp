@@ -11,7 +11,7 @@
 #include "instDecoder.h"
 #include "instSimulator.h"
 //test
-#include <unistd.h>
+//#include <unistd.h>
 
 
 int main(int argc, const char * argv[])
@@ -22,8 +22,8 @@ int main(int argc, const char * argv[])
 		return 1;
 	}
 	
-    char * dir = getcwd(NULL, 0); // Platform-dependent, see reference link below
-    printf("Current dir: %s\n", dir);
+    //char * dir = getcwd(NULL, 0); // Platform-dependent, see reference link below
+    //printf("Current dir: %s\n", dir);
     
     InstDecoder decoder;
 

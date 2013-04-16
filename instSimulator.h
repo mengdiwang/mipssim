@@ -24,7 +24,7 @@ public:
     }
     
     int Run(InstDecoder &instdec);
-    int Output(const char* outFile);
+    int Output(std::string fileName);
     
 private:
     void SetMem(const std::vector<Data> &mm)

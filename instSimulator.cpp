@@ -168,11 +168,9 @@ int InstSim::Run(InstDecoder &instdec)
     return ret;
 }
 
-int InstSim::Output(const char* outFile)
+int InstSim::Output(std::string fileName)
 {
-    std::string fileName = (std::string)outFile;
-    
-    std::ofstream outstream(fileName);
+    std::ofstream outstream(fileName.c_str());
     
     if(outstream.is_open())
     {

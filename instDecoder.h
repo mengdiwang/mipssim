@@ -58,7 +58,7 @@ enum insttype
 class Inst
 {
 public:
-    Inst():address(0),rs(0),rt(0),rd(0),other(0)
+    Inst():address(0),rs(0),rt(0),rd(0),sa(0),other(0)
     {
         memset(code, 0, sizeof(code));
     }
@@ -96,7 +96,7 @@ public:
     };
     
     int Decode(const char *inFile);
-    int Output(const char *outFile);
+    int Output(std::string fileName);
     const std::vector<Inst> &GetInsts()
     {
         return insts;
