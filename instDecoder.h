@@ -26,9 +26,9 @@ const std::string typestr[28] = {"J", "JR", "BEQ", "BLTZ", "BGTZ", "BREAK", "SW"
 enum insttype
 {
     NIL                 = -1,
-    J 	= 0,
-    JR 	= 1,
-    BEQ 	= 2,
+    J                   = 0,
+    JR                  = 1,
+    BEQ                 = 2,
     BLTZ	= 3,
     BGTZ	= 4,
     BREAK	= 5,
