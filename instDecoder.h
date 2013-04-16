@@ -25,41 +25,41 @@ const std::string typestr[28] = {"J", "JR", "BEQ", "BLTZ", "BGTZ", "BREAK", "SW"
 //--------------------------------------------------------------------------
 enum insttype
 {
-    NIL                 = -1,
-    J                   = 0,
-    JR                  = 1,
-    BEQ                 = 2,
+    NIL		= -1,
+    J		= 0,
+    JR		= 1,
+    BEQ		= 2,
     BLTZ	= 3,
     BGTZ	= 4,
     BREAK	= 5,
-    SW	= 6,
-    LW	= 7,
-    SLL	= 8,
-    SRL	= 9,
-    SRA	= 10,
-    NOP	= 11,
-    ADD	= 12,
-    SUB	= 13,
-    MUL	= 14,
-    AND	= 15,
-    OR	= 16,
-    XOR	= 17,
-    NOR	= 18,
-    SLT	= 19,
+    SW		= 6,
+    LW		= 7,
+    SLL		= 8,
+    SRL		= 9,
+    SRA		= 10,
+    NOP		= 11,
+    ADD		= 12,
+    SUB		= 13,
+    MUL		= 14,
+    AND		= 15,
+    OR		= 16,
+    XOR		= 17,
+    NOR		= 18,
+    SLT		= 19,
     ADDI	= 20,
     ANDI	= 21,
-    ORI	= 22,
+    ORI		= 22,
     XORI	= 23,
-    SUBI                = 24,
-    MULI                = 25,
-    NORI                = 26,
-    SLTI                = 27
+    SUBI	= 24,
+    MULI	= 25,
+    NORI	= 26,
+    SLTI	= 27
 };
 //--------------------------------------------------------------------------
 class Inst
 {
 public:
-    Inst():address(0),rs(0),rt(0),rd(0),sa(0),other(0)
+    Inst():address(0),other(0),rs(0),rt(0),rd(0),sa(0)
     {
         memset(code, 0, sizeof(code));
     }

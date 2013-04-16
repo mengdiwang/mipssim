@@ -16,7 +16,7 @@
 
 int main(int argc, const char * argv[])
 {
-	if(argc < 1)
+	if(argc < 2)
 	{
 		printf("Usage: MIPSsim <input>\n");
 		return 1;
