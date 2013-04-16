@@ -303,12 +303,6 @@ int InstDecoder::ParseFile(std::string inFile)
         
         while(std::getline(instream,line))
         {
-            //if(line[0] == CAT1[0] && line[1] == CAT1[1])
-            //{
-            //    AddC1type(line, address);
-            //}
-            
-            //std::cout << line << std::endl;
             short isvalid = 0;
             
             if(isbreak)
@@ -520,68 +514,6 @@ int InstDecoder::ADDMISPSpec(std::string inststr, Inst &inst, short &valid)
     return 0;
 }
 
-/*
-int InstDecoder::AddC1type(std::string inststr, Inst &inst, short &valid)
-{
-    int idb = GetInstIDB4(inststr);
-    
-    switch (idb) {
-        case 0:
-            valid = 1;
-            inst.type = insttype(J);
-            break;
-        case 1:
-            valid = 1;
-            inst.type = insttype(JR);
-            break;
-        case 2:
-            valid = 1;
-            inst.type = insttype(BEQ);
-            break;
-        case 3:
-            valid = 1;
-            inst.type = insttype(BLTZ);
-            break;
-        case 4:
-            valid = 1;
-            inst.type = insttype(BGTZ);
-            break;
-        case 5:
-            valid = 1;
-            inst.type = insttype(BREAK);
-            break;
-        case 6:
-            valid = 1;
-            inst.type = insttype(SW);
-            break;
-        case 7:
-            valid = 1;
-            inst.type = insttype(LW);
-            break;
-        case 8:
-            valid = 1;
-            inst.type = insttype(SLL);
-            break;
-        case 9:
-            valid = 1;
-            inst.type = insttype(SRL);
-            break;
-        case 10:
-            valid = 1;
-            inst.type = insttype(SRA);
-            break;
-        case 11:
-            valid = 1;
-            inst.type = insttype(NOP);
-            break;
-        default:
-            break;
-    }
-    
-    return 0;
-}
-*/
-
 int InstDecoder::AddC2type(std::string inststr, Inst &inst, short &valid)
 {
     int idb = GetInstIDB4(inststr);
@@ -617,38 +549,6 @@ int InstDecoder::AddC2type(std::string inststr, Inst &inst, short &valid)
             inst.type = insttype(SLTI);
             DecSLTI(inststr, inst);
             break;
-/*
-        case 4:
-            valid = 1;
-            inst.type = insttype(OR);
-            DecOR(inststr, inst);
-            break;
-        case 5:
-            valid = 1;
-            inst.type = insttype(XOR);
-            DecXOR(inststr, inst);
-            break;
-        case 8:
-            valid = 1;
-            inst.type = insttype(ADDI);
-            //
-            break;
-        case 9:
-            valid = 1;
-            inst.type = insttype(ANDI);
-            //
-            break;
-        case 10:
-            valid = 1;
-            inst.type = insttype(ORI);
-            //
-            break;
-        case 11:
-            valid = 1;
-            inst.type = insttype(XORI);
-            //
-            break;
- */
         default:
             break;
     }
