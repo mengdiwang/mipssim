@@ -320,7 +320,7 @@ int InstDecoder::ParseFile(std::string inFile)
             {
                 Inst inst;
             
-                if(line[0] == CAT2[0] && line[1] == CAT2[1])
+                if(line[0] == CAT2[0])
                 {
                     AddC2type(line, inst, isvalid);
                 }
