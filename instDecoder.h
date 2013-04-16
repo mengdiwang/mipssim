@@ -11,9 +11,9 @@
 //--------------------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
+#include <memory.h>
 #include <vector>
 #include <string>
-#include <memory.h>
 //--------------------------------------------------------------------------
 const int ADDBASE       = 64;
 const int INSTLENGTH    = 32;
@@ -25,35 +25,35 @@ const std::string typestr[28] = {"J", "JR", "BEQ", "BLTZ", "BGTZ", "BREAK", "SW"
 //--------------------------------------------------------------------------
 enum insttype
 {
-    NIL     = -1,
-    J 		= 0,
-    JR 		= 1,
+    NIL                 = -1,
+    J 	= 0,
+    JR 	= 1,
     BEQ 	= 2,
     BLTZ	= 3,
     BGTZ	= 4,
     BREAK	= 5,
-    SW		= 6,
-    LW		= 7,
-    SLL		= 8,
-    SRL		= 9,
-    SRA		= 10,
-    NOP		= 11,
-    ADD		= 12,
-    SUB		= 13,
-    MUL		= 14,
-    AND		= 15,
-    OR		= 16,
-    XOR		= 17,
-    NOR		= 18,
-    SLT		= 19,
+    SW	= 6,
+    LW	= 7,
+    SLL	= 8,
+    SRL	= 9,
+    SRA	= 10,
+    NOP	= 11,
+    ADD	= 12,
+    SUB	= 13,
+    MUL	= 14,
+    AND	= 15,
+    OR	= 16,
+    XOR	= 17,
+    NOR	= 18,
+    SLT	= 19,
     ADDI	= 20,
     ANDI	= 21,
-    ORI		= 22,
+    ORI	= 22,
     XORI	= 23,
-    SUBI    = 24,
-    MULI    = 25,
-    NORI    = 26,
-    SLTI    = 27
+    SUBI                = 24,
+    MULI                = 25,
+    NORI                = 26,
+    SLTI                = 27
 };
 //--------------------------------------------------------------------------
 class Inst
@@ -73,7 +73,6 @@ public:
     unsigned short rt;
     unsigned short rd;
     unsigned short sa;
-    //short imvalue;
     char code[32+2];
 };
 //--------------------------------------------------------------------------
@@ -110,7 +109,6 @@ public:
     
 private:
     int ParseFile(std::string inFile);
-    //int AddC1type(std::string inststr, Inst &inst, short &isvalid);
     int AddC2type(std::string inststr, Inst &inst, short &isvalid);
     int AddMISP(std::string inststr, Inst &inst, short &isvalid);
     int ADDMISPSpec(std::string inststr, Inst &inst, short &isvalid);
