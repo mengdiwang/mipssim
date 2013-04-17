@@ -105,7 +105,7 @@ int InstSim::Run(InstDecoder &instdec)
             case 17://XOR
                 r[i.rd] = r[i.rs] ^ r[i.rt]; break;
             case 18://NOR
-                r[i.rd] = ~(r[i.rs] | r[i.rt]); break;
+                r[i.rd] = (signed)(~((unsigned)r[i.rs] |(unsigned)r[i.rt])); break;
             case 19://SLT
                 r[i.rd] = (r[i.rs] < r[i.rs])?1:0; break;
             case 20://ADDI
