@@ -17,9 +17,6 @@
 #include <iostream>
 #endif
 
-
-const int STEPSTRLEN = 500;
-
 inline int GetInstIndex(int address)
 {
     return (address - ADDBASE) >> 2;
@@ -34,7 +31,6 @@ int InstSim::Run(InstDecoder &instdec)
     std::stringstream stepoutput;
     
     SetMem(instdec.GetDatas());
-    
     
     while(true)
     {
@@ -105,7 +101,7 @@ int InstSim::Run(InstDecoder &instdec)
             case 17://XOR
                 r[i.rd] = r[i.rs] ^ r[i.rt]; break;
             case 18://NOR
-                r[i.rd] = (signed)(~((unsigned)r[i.rs] |(unsigned)r[i.rt])); break;
+                r[i.rd] = (signed)(~((unsigned)r[i.rs] | (unsigned)r[i.rt])); break;
             case 19://SLT
                 r[i.rd] = (r[i.rs] < r[i.rs])?1:0; break;
             case 20://ADDI
@@ -117,7 +113,7 @@ int InstSim::Run(InstDecoder &instdec)
             case 25://MULI
                 r[i.rt] = r[i.rs] * i.other; break;
             case 26://NORI
-                r[i.rt] = ~(r[i.rs]|i.other); break;
+                r[i.rt] = (signed)(~((unsigned)r[i.rs] | (unsigned)i.other)); break;
             case 27://SLTI
                 r[i.rt] = (r[i.rs] < i.other)?1:0; break;
             default:
