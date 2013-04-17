@@ -20,6 +20,9 @@ simply 'make' to build MIPSsim
 Layout of the source tree
 =========================
 
-mipssim/            Source of MIPSsim, disambler and simulator
-        test/       Source of TestGen, generating test data
-        testdata/   3 group of test data
+core directories
+----------------
++ mipssim/            Source of MIPSsim, disambler and simulator
++ mipssim/test/       Source of TestGen, generating test data
++ mipssim/testdata/   3 group of test data
+
