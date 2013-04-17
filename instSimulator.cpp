@@ -6,11 +6,12 @@
 //  Copyright (c) 2013年 Mengdi Wang. All rights reserved.
 //
 
-//#define TEST
+#define TEST
 
 #include "instSimulator.h"
 #include <sstream>
 #include <fstream>
+#include <cmath>
 
 #ifdef TEST
 #include <iostream>
@@ -139,14 +140,14 @@ int InstSim::Run(InstDecoder &instdec)
             stepoutput << '\t' << r[j];
         
         stepoutput << "\n\nData\n";
-        int memsize = (mem.size() * 4.0 + 16) / 32;
+        int memsize = std::ceil((mem.size() + 0.0) / 8);
         for(int j=0; j<memsize; j++)
         {
             stepoutput << mem[j<<3].address << ':';
             for(int k=0; k<8; k++)
             {
                 int memidx = (j<<3)+k;
-                if(memidx < mem.size() << 2)
+                if(memidx < mem.size())
                     stepoutput <<'\t' << mem[memidx].data;
             }
             stepoutput << '\n';

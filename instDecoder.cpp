@@ -6,7 +6,7 @@
 //  Copyright (c) 2013年 Mengdi Wang. All rights reserved.
 //
 
-//#define TEST
+#define TEST
 
 #include "instDecoder.h"
 #include <memory.h>
@@ -320,11 +320,7 @@ int InstDecoder::ParseFile(std::string inFile)
             {
                 Inst inst;
             
-                if(line[0] == CAT2[0])
-                {
-                    AddC2type(line, inst, isvalid);
-                }
-                else if(GetInstIDB6(line)==0)
+                if(GetInstIDB6(line)==0)
                 {
                     ADDMISPSpec(line, inst, isvalid);
                 }
@@ -410,26 +406,37 @@ int InstDecoder::AddMISP(std::string inststr, Inst &inst, short &valid)
             DecMUL(inststr, inst);
             valid = 1;
             break;
-        case 8://ADDI
+        case 48:
+            valid = 1;
             inst.type = insttype(ADDI);
-            //
-            valid = 1;
+            DecADDI(inststr, inst);
             break;
-        case 12://ANDI
+        case 49:
+            valid = 1;
+            inst.type = insttype(SUBI);
+            DecSUBI(inststr, inst);
+            break;
+        case 33:
+            valid = 1;
+            inst.type = insttype(MULI);
+            DecMULI(inststr, inst);
+            break;
+        case 50:
+            valid = 1;
             inst.type = insttype(ANDI);
-            //
-            valid = 1;
+            DecANDI(inststr, inst);
             break;
-        case 13://ORI
-            inst.type = insttype(ORI);
-            //
+        case 51:
             valid = 1;
+            inst.type = insttype(NORI);
+            DecNORI(inststr, inst);
             break;
-        case 14://XORI
-            inst.type = insttype(XORI);
-            //
+        case 53:
             valid = 1;
+            inst.type = insttype(SLTI);
+            DecSLTI(inststr, inst);
             break;
+            
         default:
             break;
     }
@@ -513,48 +520,6 @@ int InstDecoder::ADDMISPSpec(std::string inststr, Inst &inst, short &valid)
             break;
     }
         
-    return 0;
-}
-
-int InstDecoder::AddC2type(std::string inststr, Inst &inst, short &valid)
-{
-    int idb = GetInstIDB4(inststr);
-    
-    switch (idb) {
-        case 0:
-            valid = 1;
-            inst.type = insttype(ADDI);
-            DecADDI(inststr, inst);
-            break;
-        case 1:
-            valid = 1;
-            inst.type = insttype(SUBI);
-            DecSUBI(inststr, inst);
-            break;
-        case 2:
-            valid = 1;
-            inst.type = insttype(MULI);
-            DecMULI(inststr, inst);
-            break;
-        case 3:
-            valid = 1;
-            inst.type = insttype(ANDI);
-            DecANDI(inststr, inst);
-            break;
-        case 6:
-            valid = 1;
-            inst.type = insttype(NORI);
-            DecNORI(inststr, inst);
-            break;
-        case 7:
-            valid = 1;
-            inst.type = insttype(SLTI);
-            DecSLTI(inststr, inst);
-            break;
-        default:
-            break;
-    }
-    
     return 0;
 }
 

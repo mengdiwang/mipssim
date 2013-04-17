@@ -109,7 +109,6 @@ public:
     
 private:
     int ParseFile(std::string inFile);
-    int AddC2type(std::string inststr, Inst &inst, short &isvalid);
     int AddMISP(std::string inststr, Inst &inst, short &isvalid);
     int ADDMISPSpec(std::string inststr, Inst &inst, short &isvalid);
     
