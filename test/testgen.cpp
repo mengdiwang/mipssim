@@ -89,7 +89,7 @@ int operationShift(std::string line, int &rd, int &rt, int &sa)
 int operationCat2(std::string line, int &rs, int &rt, int &im)
 {
     std::string linearg = GetArgStr(line);
-    sscanf(linearg.c_str(), "R%d R%d #%d", &rs, &rt, &im);
+    sscanf(linearg.c_str(), "R%d, R%d, #%d", &rs, &rt, &im);
 }
 
 int operationBXTZ(std::string line, int &rs, int &offset)
