@@ -14,48 +14,8 @@
 #include <memory.h>
 #include <vector>
 #include <string>
-//--------------------------------------------------------------------------
-const int ADDBASE       = 64;
-const int INSTLENGTH    = 32;
-const std::string CAT1  = "01";
-const std::string CAT2  = "11";
-//--------------------------------------------------------------------------
-const std::string typestr[28] = {"J", "JR", "BEQ", "BLTZ", "BGTZ", "BREAK", "SW", "LW", "SLL", "SRL", "STA", "NOP",
-                        "ADD", "SUB", "MUL", "AND", "OR", "XOR", "NOR", "SLT", "ADD", "AND", "ORI", "XORI", "SUB", "MUL", "NOR", "SLT"};
-//--------------------------------------------------------------------------
-enum insttype
-{
-    NIL		= -1,
-    J		= 0,
-    JR		= 1,
-    BEQ		= 2,
-    BLTZ	= 3,
-    BGTZ	= 4,
-    BREAK	= 5,
-    SW		= 6,
-    LW		= 7,
-    SLL		= 8,
-    SRL		= 9,
-    SRA		= 10,
-    NOP		= 11,
-    ADD		= 12,
-    SUB		= 13,
-    MUL		= 14,
-    AND		= 15,
-    OR		= 16,
-    XOR		= 17,
-    NOR		= 18,
-    SLT		= 19,
-    ADDI	= 20,
-    ANDI	= 21,
-    ORI		= 22,
-    XORI	= 23,
-    SUBI	= 24,
-    MULI	= 25,
-    NORI	= 26,
-    SLTI	= 27
-};
-//--------------------------------------------------------------------------
+#include "constdef.h"
+
 class Inst
 {
 public:
@@ -109,8 +69,8 @@ public:
     
 private:
     int ParseFile(std::string inFile);
-    int AddMISP(std::string inststr, Inst &inst, short &isvalid);
-    int ADDMISPSpec(std::string inststr, Inst &inst, short &isvalid);
+    int AddMISP(std::string inststr, Inst &inst);
+    int ADDMISPSpec(std::string inststr, Inst &inst, bool &isbreak);
     
 private:
     std::vector<Inst> insts;

@@ -40,21 +40,21 @@ Inst &DecBEQ(std::string inststr, Inst &inst)
 {
     inst.rs = GetInstIDB(6, 10, inststr);
     inst.rt = GetInstIDB(11, 15, inststr);
-    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr) << 2;
+    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr) << IMMOFFSET;
     return inst;
 }
 
 Inst &DecBLTZ(std::string inststr, Inst &inst)
 {
     inst.rs = GetInstIDB(6, 10, inststr);
-    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr) << 2;
+    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr) << IMMOFFSET;
     return inst;
 }
 
 Inst &DecBGTZ(std::string inststr, Inst &inst)
 {
     inst.rs = GetInstIDB(6, 10, inststr);
-    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr) << 2;
+    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr) << IMMOFFSET;
     return inst;
 }
 
@@ -193,44 +193,44 @@ std::string GetCodeDisplay(Inst &inst)
     std::stringstream ss;
     switch(inst.type)
     {
-        case 0://J
+        case insttype(J)://J
             sprintf(tmp, "#%u", inst.other);
             break;
-        case 1://JR
+        case insttype(JR)://JR
             sprintf(tmp, "R%u", inst.rs);
             break;
-        case 2://BEQ
+        case insttype(BEQ)://BEQ
             sprintf(tmp, "R%u, R%u, #%u", inst.rs, inst.rt, inst.other);
             break;
-        case 3://BLTZ
-        case 4://BGTZ
+        case insttype(BLTZ)://BLTZ
+        case insttype(BGTZ)://BGTZ
             sprintf(tmp, "R%u, #%u", inst.rs, inst.other);
             break;
-        case 6://SW
-        case 7://LW
+        case insttype(SW)://SW
+        case insttype(LW)://LW
             sprintf(tmp, "R%u, %u(R%u)", inst.rt, inst.other, inst.rs);
             break;
-        case 8://SLL
-        case 9://SRL
-        case 10://SRA
+        case insttype(SLL)://SLL
+        case insttype(SRL)://SRL
+        case insttype(SRA)://SRA
             sprintf(tmp, "R%u, R%u, #%u", inst.rd, inst.rt, inst.sa);
             break;
-        case 12://ADD
-        case 13://SUB
-        case 14://MUL
-        case 15://AND
-        case 16://OR
-        case 17://XOR
-        case 18://NOR
-        case 19://SLT
+        case insttype(ADD)://ADD
+        case insttype(SUB)://SUB
+        case insttype(MUL)://MUL
+        case insttype(AND)://AND
+        case insttype(OR)://OR
+        case insttype(XOR)://XOR
+        case insttype(NOR)://NOR
+        case insttype(SLT)://SLT
             sprintf(tmp, "R%u, R%u, R%u", inst.rd, inst.rs, inst.rt);
             break;
-        case 20://ADDI
-        case 21://ANDI
-        case 24://SUBI
-        case 25://MULI
-        case 26://NORI
-        case 27://SLTI
+        case insttype(ADDI)://ADDI
+        case insttype(ANDI)://ANDI
+        case insttype(SUBI)://SUBI
+        case insttype(MULI)://MULI
+        case insttype(NORI)://NORI
+        case insttype(SLTI)://SLTI
             sprintf(tmp, "R%u, R%u, #%u", inst.rt, inst.rs, inst.other);
             break;
         default:
@@ -248,12 +248,6 @@ std::string GetCodeType(Inst &inst)
         return typestr[inst.type];
     return "";
 }
-
-//Inst &DecADDI(std::string inststr, Inst &inst){}
-//Inst &DecANDI(std::string inststr, Inst &inst){}
-//Inst &DecORI(std::string inststr, Inst &inst){}
-//Inst &DecXORI(std::string inststr, Inst &inst){}
-
 
 int GetInstIDB4(std::string inststr)
 {
@@ -305,8 +299,6 @@ int InstDecoder::ParseFile(std::string inFile)
         
         while(std::getline(instream,line))
         {
-            short isvalid = 0;
-            
             if(isbreak)
             {
                 Data data;
@@ -322,21 +314,17 @@ int InstDecoder::ParseFile(std::string inFile)
             
                 if(GetInstIDB6(line)==0)
                 {
-                    ADDMISPSpec(line, inst, isvalid);
+                    ADDMISPSpec(line, inst, isbreak);
                 }
                 else
                 {
-                    AddMISP(line, inst, isvalid);
+                    AddMISP(line, inst);
                 }
             
                 memcpy(inst.code, line.c_str(), INSTLENGTH);
                 inst.address = address;
                 insts.push_back(inst);
             
-                if(isvalid == 2)
-                {
-                    isbreak = true;
-                }
             }
             
             address += 4;
@@ -366,73 +354,60 @@ int GetInstIDB(int instl, int insth, std::string inststr)
     return idb;
 }
 
-int InstDecoder::AddMISP(std::string inststr, Inst &inst, short &valid)
+int InstDecoder::AddMISP(std::string inststr, Inst &inst)
 {
     int idb = GetInstIDB6(inststr);
     
     switch (idb) {
-        case 2://J
+        case IDJ://J
             inst.type = insttype(J);
             DecJ(inststr, inst);
-            valid = 1;
             break;
-        case 4://BEQ
+        case IDBEQ://BEQ
             inst.type = insttype(BEQ);
             DecBEQ(inststr, inst);
-            valid = 1;
             break;
-        case 1://BLTZ
+        case IDBLTZ://BLTZ
             inst.type = insttype(BLTZ);
             DecBLTZ(inststr, inst);
-            valid = 1;
             break;
-        case 7://BGTZ
+        case IDBGTZ://BGTZ
             inst.type = insttype(BGTZ);
             DecBGTZ(inststr, inst);
-            valid = 1;
             break;
-        case 43://SW
+        case IDSW://SW
             inst.type = insttype(SW);
             DecSW(inststr, inst);
-            valid = 1;
             break;
-        case 35://LW
+        case IDLW://LW
             inst.type = insttype(LW);
             DecLW(inststr, inst);
-            valid = 1;
             break;
-        case 28://MUL
+        case IDMUL://MUL
             inst.type = insttype(MUL);
             DecMUL(inststr, inst);
-            valid = 1;
             break;
-        case 48:
-            valid = 1;
+        case IDADDI://ADDI
             inst.type = insttype(ADDI);
             DecADDI(inststr, inst);
             break;
-        case 49:
-            valid = 1;
+        case IDSUBI://SUBI
             inst.type = insttype(SUBI);
             DecSUBI(inststr, inst);
             break;
-        case 33:
-            valid = 1;
+        case IDMULI://MULI
             inst.type = insttype(MULI);
             DecMULI(inststr, inst);
             break;
-        case 50:
-            valid = 1;
+        case IDANDI://ANDI
             inst.type = insttype(ANDI);
             DecANDI(inststr, inst);
             break;
-        case 51:
-            valid = 1;
+        case IDNORI://NORI
             inst.type = insttype(NORI);
             DecNORI(inststr, inst);
             break;
-        case 53:
-            valid = 1;
+        case IDSLTI://SLTI
             inst.type = insttype(SLTI);
             DecSLTI(inststr, inst);
             break;
@@ -444,23 +419,22 @@ int InstDecoder::AddMISP(std::string inststr, Inst &inst, short &valid)
     return 0;
 }
 
-int InstDecoder::ADDMISPSpec(std::string inststr, Inst &inst, short &valid)
+int InstDecoder::ADDMISPSpec(std::string inststr, Inst &inst, bool &isbreak)
 {
     //SPECIL:JR|BREAK|SLL|SRL|SRA|NOP|ADD|SUB|AND|OR|XOR|NOR|SLT LAST 6 bit !!!
     int RIDB = GetInstIDB6R(inststr);
     
     switch (RIDB) {
-        case 8://JR
+        case IDJR://JR
             inst.type = insttype(JR);
             DecJR(inststr, inst);
-            valid = 1;
             break;
-        case 13://BREAK
+        case IDBREAK://BREAK
             inst.type = insttype(BREAK);
-            valid = 2;
+            isbreak = true;
             break;
-        case 0://SLL | NOP(all 0)
-            if (GetInstIDB(0, 31, inststr) == 0)
+        case IDSLLNOP://SLL | NOP(all 0)
+            if (GetInstIDB(0, INSTLENGTH-1, inststr) == 0)
             {
                 inst.type = insttype(NOP);
             }
@@ -469,52 +443,42 @@ int InstDecoder::ADDMISPSpec(std::string inststr, Inst &inst, short &valid)
                 inst.type = insttype(SLL);
                 DecSLL(inststr, inst);
             }
-            valid = 1;
             break;
-        case 2://SRL
+        case IDSRL://SRL
             inst.type = insttype(SRL);
             DecSRL(inststr, inst);
-            valid = 1;
             break;
-        case 3://SRA
+        case IDSRA://SRA
             inst.type = insttype(SRA);
             DecSRA(inststr, inst);
-            valid = 1;
             break;
-        case 32://ADD
+        case IDADD://ADD
             inst.type = insttype(ADD);
             DecADD(inststr, inst);
-            valid = 1;
             break;
-        case 34://SUB
+        case IDSUB://SUB
             inst.type = insttype(SUB);
             DecSUB(inststr, inst);
-            valid = 1;
             break;
-        case 36://AND
+        case IDAND://AND
             inst.type = insttype(AND);
             DecAND(inststr, inst);
-            valid = 1;
             break;
-        case 37://OR
+        case IDOR://OR
             inst.type = insttype(OR);
             DecOR(inststr, inst);
-            valid = 1;
             break;
-        case 38://XOR
+        case IDXOR://XOR
             inst.type = insttype(XOR);
             DecXOR(inststr, inst);
-            valid = 1;
             break;
-        case 39://NOR
+        case IDNOR://NOR
             inst.type = insttype(NOR);
             DecNOR(inststr, inst);
-            valid = 1;
             break;
-        case 42://SLT
+        case IDSLT://SLT
             inst.type = insttype(SLT);
             DecSLT(inststr, inst);
-            valid = 1;
             break;
         default:
             break;

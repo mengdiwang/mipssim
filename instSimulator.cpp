@@ -19,7 +19,7 @@
 
 inline int GetInstIndex(int address)
 {
-    return (address - ADDBASE) >> 2;
+    return (address - ADDBASE) >> IMMOFFSET;
 }
 
 int InstSim::Run(InstDecoder &instdec)
@@ -42,79 +42,79 @@ int InstSim::Run(InstDecoder &instdec)
         Inst i= instdec.GetInsts()[codeidx];
         switch (i.type)
         {
-            case 0://J
+            case insttype(J)://J
                 jump = true;
                 codeidx = GetInstIndex(i.other);
                 break;
-            case 1://JR
+            case insttype(JR)://JR
                 jump = true;
                 codeidx = GetInstIndex(r[i.rs]);
                 break;
-            case 2://BEQ
+            case insttype(BEQ)://BEQ
             {
                 if(r[i.rs] == r[i.rt])
                     codeidx += i.other >> 2;
             }
                 break;
-            case 3://BLTZ
+            case insttype(BLTZ)://BLTZ
             {
                 if(r[i.rs] < 0)
                     codeidx += i.other >> 2;
             }
                 break;
-            case 4://BGTZ
+            case insttype(BGTZ)://BGTZ
             {
                 if(r[i.rs] > 0)
                     codeidx  += i.other >> 2;
             }
                 break;
-            case 5://BREAK
+            case insttype(BREAK)://BREAK
                 isBreak = true;
                 break;
-            case 6://SW
+            case insttype(SW)://SW
                 SetMembyAddr(r[i.rs] + i.other, r[i.rt]); break;
-            case 7://LW rt <- memory[r[base] + offset]
+            case insttype(LW)://LW rt <- memory[r[base] + offset]
             {
                 int data = 0;
                 if(GetMembyAddr(r[i.rs] + i.other, data))
                     r[i.rt] = data;
             }
                 break;
-            case 8://SLL
+            case insttype(SLL)://SLL
                 r[i.rd] = r[i.rt] << i.sa; break;
-            case 9://SRL
+            case insttype(SRL)://SRL
                 r[i.rd] = (signed)((unsigned)r[i.rt] >> i.sa); break; //Logic right shift does not remain sign bit
-            case 10://SRA
+            case insttype(SRA)://SRA
                 r[i.rd] = r[i.rt] >> i.sa; break;
-            case 11://NOP
+            case insttype(NOP)://NOP
                 break;
-            case 12://ADD
+            case insttype(ADD)://ADD
                 r[i.rd] = r[i.rs] + r[i.rt]; break;
-            case 13://SUB
+            case insttype(SUB)://SUB
                 r[i.rd] = r[i.rs] - r[i.rt]; break;
-            case 14://MUL
+            case insttype(MUL)://MUL
                 r[i.rd] = r[i.rs] * r[i.rt]; break;
-            case 15://AND
+            case insttype(AND)://AND
                 r[i.rd] = r[i.rs] & r[i.rt]; break;
-            case 16://OR
+            case insttype(OR)://OR
                 r[i.rd] = r[i.rs] | r[i.rt]; break;
-            case 17://XOR
+            case insttype(XOR)://XOR
                 r[i.rd] = r[i.rs] ^ r[i.rt]; break;
-            case 18://NOR
+            case insttype(NOR)://NOR
                 r[i.rd] = (signed)(~((unsigned)r[i.rs] | (unsigned)r[i.rt])); break;
-            case 19://SLT
+            case insttype(SLT)://SLT
                 r[i.rd] = (r[i.rs] < r[i.rs])?1:0; break;
-            case 20://ADDI
+            case insttype(ADDI)://ADDI
                 r[i.rt] = r[i.rs] + i.other; break;
-            case 21://ANDI
+            case insttype(ANDI)://ANDI
                 r[i.rt] = r[i.rs] & i.other; break;
-            case 24://SUBI
+            case insttype(SUBI)://SUBI
                 r[i.rt] = r[i.rs] - i.other; break;
-            case 25://MULI
+            case insttype(MULI)://MULI
                 r[i.rt] = r[i.rs] * i.other; break;
-            case 26://NORI
+            case insttype(NORI)://NORI
                 r[i.rt] = (signed)(~((unsigned)r[i.rs] | (unsigned)i.other)); break;
-            case 27://SLTI
+            case insttype(SLTI)://SLTI
                 r[i.rt] = (r[i.rs] < i.other)?1:0; break;
             default:
                 break;

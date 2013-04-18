@@ -10,6 +10,7 @@
 #define MISPsim_instSimulator_h
 
 #include "instDecoder.h"
+#include "constdef.h"
 #include <vector>
 
 const int REGISTERNUM = 32;
