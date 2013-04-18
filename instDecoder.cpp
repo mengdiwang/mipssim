@@ -514,9 +514,9 @@ int InstDecoder::Output(std::string fileName)
                     //printf("%c", insts[i].code[instoffset[j]+k]);
 #endif
                 }
-                outstream << ' ';
+                outstream << (j==5?'\t':' ');
 #ifdef TEST
-                std::cout << ' ';
+                std::cout << (j==5?'\t':' ');
                 //printf(" ");
 #endif
             }
@@ -525,8 +525,8 @@ int InstDecoder::Output(std::string fileName)
             << ((insts[i].type==-1)? "" : GetCodeDisplay(' ',insts[i])) << std::endl;
             
 #ifdef TEST
-            std::cout << insts[i].address << '\t' << typestr[insts[i].type].c_str() <<' '
-                      << ((insts[i].type==-1)? "" : GetCodeDisplay(insts[i])) << std::endl;
+            std::cout << insts[i].address << '\t' << typestr[insts[i].type].c_str()
+            << ((insts[i].type==-1)? "" : GetCodeDisplay(' ',insts[i])) << std::endl;
             //printf("%d\t%s %s\n", insts[i].address, typestr[insts[i].type].c_str(), insts[i].type==-1?"":GetCodeDisplay(insts[i]));
 #endif
         }
