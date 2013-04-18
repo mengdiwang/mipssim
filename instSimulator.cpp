@@ -6,7 +6,7 @@
 //  Copyright (c) 2013年 Mengdi Wang. All rights reserved.
 //
 
-#define TEST
+//#define TEST
 
 #include "instSimulator.h"
 #include <sstream>
@@ -125,7 +125,7 @@ int InstSim::Run(InstDecoder &instdec)
         //---------------------------------------------------------
         
         stepoutput << "--------------------\n";
-        stepoutput << "Cycle:"<< cycle << "\t" << i.address << "\t" << GetCodeType(i) << '\t' << GetCodeDisplay(i) << "\n\nRegisters";
+        stepoutput << "Cycle:"<< cycle << "\t" << i.address << "\t" << GetCodeType(i) << GetCodeDisplay('\t',i) << "\n\nRegisters";
         
         stepoutput << "\nR00:";
         for(int j=0; j<(REGISTERNUM>>1); j++)

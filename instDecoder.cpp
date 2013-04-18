@@ -6,7 +6,7 @@
 //  Copyright (c) 2013年 Mengdi Wang. All rights reserved.
 //
 
-#define TEST
+//#define TEST
 
 #include "instDecoder.h"
 #include <memory.h>
@@ -187,33 +187,33 @@ Inst &DecSLTI(std::string inststr, Inst &inst)
     return DecSpecialAI(inststr, inst);
 }
 
-std::string GetCodeDisplay(Inst &inst)
+std::string GetCodeDisplay(char sip, Inst &inst)
 {
     char tmp[100] = {0};
     std::stringstream ss;
     switch(inst.type)
     {
         case insttype(J)://J
-            sprintf(tmp, "#%u", inst.other);
+            sprintf(tmp, "%c#%u", sip, inst.other);
             break;
         case insttype(JR)://JR
-            sprintf(tmp, "R%u", inst.rs);
+            sprintf(tmp, "%cR%u", sip, inst.rs);
             break;
         case insttype(BEQ)://BEQ
-            sprintf(tmp, "R%u, R%u, #%u", inst.rs, inst.rt, inst.other);
+            sprintf(tmp, "%cR%u, R%u, #%u", sip, inst.rs, inst.rt, inst.other);
             break;
         case insttype(BLTZ)://BLTZ
         case insttype(BGTZ)://BGTZ
-            sprintf(tmp, "R%u, #%u", inst.rs, inst.other);
+            sprintf(tmp, "%cR%u, #%u", sip, inst.rs, inst.other);
             break;
         case insttype(SW)://SW
         case insttype(LW)://LW
-            sprintf(tmp, "R%u, %u(R%u)", inst.rt, inst.other, inst.rs);
+            sprintf(tmp, "%cR%u, %u(R%u)", sip, inst.rt, inst.other, inst.rs);
             break;
         case insttype(SLL)://SLL
         case insttype(SRL)://SRL
         case insttype(SRA)://SRA
-            sprintf(tmp, "R%u, R%u, #%u", inst.rd, inst.rt, inst.sa);
+            sprintf(tmp, "%cR%u, R%u, #%u", sip, inst.rd, inst.rt, inst.sa);
             break;
         case insttype(ADD)://ADD
         case insttype(SUB)://SUB
@@ -223,7 +223,7 @@ std::string GetCodeDisplay(Inst &inst)
         case insttype(XOR)://XOR
         case insttype(NOR)://NOR
         case insttype(SLT)://SLT
-            sprintf(tmp, "R%u, R%u, R%u", inst.rd, inst.rs, inst.rt);
+            sprintf(tmp, "%cR%u, R%u, R%u", sip, inst.rd, inst.rs, inst.rt);
             break;
         case insttype(ADDI)://ADDI
         case insttype(ANDI)://ANDI
@@ -231,7 +231,7 @@ std::string GetCodeDisplay(Inst &inst)
         case insttype(MULI)://MULI
         case insttype(NORI)://NORI
         case insttype(SLTI)://SLTI
-            sprintf(tmp, "R%u, R%u, #%u", inst.rt, inst.rs, inst.other);
+            sprintf(tmp, "%cR%u, R%u, #%u", sip, inst.rt, inst.rs, inst.other);
             break;
         default:
             break;
@@ -297,8 +297,14 @@ int InstDecoder::ParseFile(std::string inFile)
     {
         bool isbreak = false;
         
+        int i=0;
+        
         while(std::getline(instream,line))
         {
+            i++;
+            if(i==8)
+                i = 8;
+            
             if(isbreak)
             {
                 Data data;
@@ -515,8 +521,8 @@ int InstDecoder::Output(std::string fileName)
 #endif
             }
             
-            outstream << insts[i].address << '\t' << typestr[insts[i].type].c_str() <<' '
-            << ((insts[i].type==-1)? "" : GetCodeDisplay(insts[i])) << std::endl;
+            outstream << insts[i].address << '\t' << typestr[insts[i].type].c_str()
+            << ((insts[i].type==-1)? "" : GetCodeDisplay(' ',insts[i])) << std::endl;
             
 #ifdef TEST
             std::cout << insts[i].address << '\t' << typestr[insts[i].type].c_str() <<' '
@@ -527,7 +533,7 @@ int InstDecoder::Output(std::string fileName)
         
         for(int i=0; i<datas.size(); i++)
         {
-            outstream << std::left << std::setw(38) << datas[i].code << datas[i].address << '\t' << datas[i].data << std::endl;
+            outstream /*<< std::left << std::setw(38)*/ << datas[i].code << '\t' << datas[i].address << '\t' << datas[i].data << std::endl;
 #ifdef TEST
             std::cout << std::left << std::setw(38) << datas[i].code << datas[i].address << '\t' << datas[i].data << std::endl;
             //printf("%-38s%d\t%d\n", datas[i].code, datas[i].address, datas[i].data);

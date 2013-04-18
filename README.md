@@ -26,3 +26,6 @@ core directories
 + mipssim/test/       Source of TestGen, generating test data
 + mipssim/testdata/   3 group of test data
 
+GitHub
+======
+https://github.com/mengdiwang/mipssim.git

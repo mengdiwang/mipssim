@@ -77,7 +77,7 @@ private:
     std::vector<Data> datas;
 };
 //--------------------------------------------------------------------------
-std::string GetCodeDisplay(Inst &inst);
+std::string GetCodeDisplay(char sip, Inst &inst);
 std::string GetCodeType(Inst &inst);
 //--------------------------------------------------------------------------
 
