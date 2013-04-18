@@ -27,7 +27,7 @@ public:
     
 public:
     unsigned int address;
-    unsigned int other;
+    int other;
     insttype type;
     unsigned short rs;
     unsigned short rt;

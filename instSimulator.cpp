@@ -6,7 +6,7 @@
 //  Copyright (c) 2013年 Mengdi Wang. All rights reserved.
 //
 
-//#define TEST
+#define TEST
 
 #include "instSimulator.h"
 #include <sstream>
@@ -136,14 +136,14 @@ int InstSim::Run(InstDecoder &instdec)
             stepoutput << '\t' << r[j];
         
         stepoutput << "\n\nData\n";
-        int memsize = std::ceil((mem.size() + 0.0) / 8);
+        int memsize = std::ceil(((signed)mem.size() + 0.0) / 8);
         for(int j=0; j<memsize; j++)
         {
             stepoutput << mem[j<<3].address << ':';
             for(int k=0; k<8; k++)
             {
                 int memidx = (j<<3)+k;
-                if(memidx < mem.size())
+                if(memidx < (signed)mem.size())
                     stepoutput <<'\t' << mem[memidx].data;
             }
             stepoutput << '\n';
@@ -151,15 +151,46 @@ int InstSim::Run(InstDecoder &instdec)
         stepoutput << '\n';
         
         //---------------------------------------------------------
+#ifdef TEST
+        std::cout << "--------------------\n";
+        std::cout << "Cycle:"<< cycle << "\t" << i.address << "\t" << GetCodeType(i) << GetCodeDisplay('\t',i) << "\n\nRegisters";
+        
+        std::cout << "\nR00:";
+        for(int j=0; j<(REGISTERNUM>>1); j++)
+            std::cout << '\t' << r[j];
+        
+        std::cout << "\nR16:";
+        for(int j=REGISTERNUM>>1; j<REGISTERNUM; j++)
+            std::cout << '\t' << r[j];
+        
+        std::cout << "\n\nData\n";
+        memsize = std::ceil((mem.size() + 0.0) / 8);
+        for(int j=0; j<memsize; j++)
+        {
+            std::cout << mem[j<<3].address << ':';
+            for(int k=0; k<8; k++)
+            {
+                int memidx = (j<<3)+k;
+                if(memidx < mem.size())
+                    std::cout <<'\t' << mem[memidx].data;
+            }
+            std::cout << '\n';
+        }
+        std::cout << '\n';
+        if(cycle > 100)
+            break;
+#endif
+        //---------------------------------------------------------
+        
         if(!jump)
             codeidx++;
         
         cycle ++;
-       
+        
     }
     
 #ifdef TEST
-    std::cout<< stepoutput.str() << std::endl;
+    //std::cout<< stepoutput.str() << std::endl;
 #endif
     output.append(stepoutput.str());
     return ret;

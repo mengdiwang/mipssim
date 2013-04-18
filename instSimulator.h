@@ -37,7 +37,7 @@ private:
     int SetMembyAddr(int address, int data)
     {
 		int idx = (address-MemBase)>>2;
-		if(idx >= 0 && idx < mem.size())
+		if(idx >= 0 && idx < (signed)mem.size())
         {
             mem[(address-MemBase)>>2].data = data;
             return 1;
@@ -48,7 +48,7 @@ private:
     int GetMembyAddr(int address, int &data)
     {
         int idx = (address-MemBase)>>2;
-        if(idx >= 0 && idx <mem.size())
+        if(idx >= 0 && idx < (signed)mem.size())
         {
             data = mem[idx].data;
             return 1;

@@ -6,7 +6,7 @@
 //  Copyright (c) 2013年 Mengdi Wang. All rights reserved.
 //
 
-//#define TEST
+#define TEST
 
 #include "instDecoder.h"
 #include <memory.h>
@@ -24,9 +24,9 @@ int GetInstIDB6(std::string inststr);
 int GetInstIDB6R(std::string inststr);
 
 
-Inst &DecJ(std::string inststr, Inst &inst)
+Inst &DecJ(std::string inststr, Inst &inst)//unsigned bit <<IMOFFSET
 {
-    inst.other = (GetInstIDB(6, INSTLENGTH-1, inststr)) << 2;
+    inst.other = (GetInstIDB(6, INSTLENGTH-1, inststr)) << IMMOFFSET;
     return inst;
 }
 
@@ -36,43 +36,53 @@ Inst &DecJR(std::string inststr, Inst &inst)
     return inst;
 }
 
-Inst &DecBEQ(std::string inststr, Inst &inst)
+Inst &DecBEQ(std::string inststr, Inst &inst)//signed 16bit <<IMOFFSET
 {
     inst.rs = GetInstIDB(6, 10, inststr);
     inst.rt = GetInstIDB(11, 15, inststr);
-    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr) << IMMOFFSET;
+    unsigned short tmp = GetInstIDB(16, INSTLENGTH-1, inststr);
+    signed short t = (signed)tmp;
+    inst.other = ((signed int)t)<< IMMOFFSET;
     return inst;
 }
 
-Inst &DecBLTZ(std::string inststr, Inst &inst)
+Inst &DecBLTZ(std::string inststr, Inst &inst)//signed 16bit <<IMOFFSET
 {
     inst.rs = GetInstIDB(6, 10, inststr);
-    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr) << IMMOFFSET;
+    unsigned short tmp = GetInstIDB(16, INSTLENGTH-1, inststr);
+    signed short t = (signed)tmp;
+    inst.other = ((signed int)t)<< IMMOFFSET;
     return inst;
 }
 
-Inst &DecBGTZ(std::string inststr, Inst &inst)
+Inst &DecBGTZ(std::string inststr, Inst &inst)//signed 16bit << IMOFFSET
 {
     inst.rs = GetInstIDB(6, 10, inststr);
-    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr) << IMMOFFSET;
+    unsigned short tmp = GetInstIDB(16, INSTLENGTH-1, inststr);
+    signed short t = (signed)tmp;
+    inst.other = ((signed int)t)<< IMMOFFSET;
     return inst;
 }
 
 //Inst &DecBREAK(std::string inststr, Inst &inst){}
 
-Inst &DecSW(std::string inststr, Inst &inst)
+Inst &DecSW(std::string inststr, Inst &inst)//signed 16bit
 {
     inst.rs = GetInstIDB(6, 10, inststr);
     inst.rt = GetInstIDB(11, 15, inststr);
-    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr);
+    unsigned short tmp = GetInstIDB(16, INSTLENGTH-1, inststr);
+    signed short t = (signed)tmp;
+    inst.other = ((signed int)t);
     return inst;
 }
 
-Inst &DecLW(std::string inststr, Inst &inst)
+Inst &DecLW(std::string inststr, Inst &inst)//signed 16bit
 {
     inst.rs = GetInstIDB(6, 10, inststr);
     inst.rt = GetInstIDB(11, 15, inststr);
-    inst.other = GetInstIDB(16, INSTLENGTH-1, inststr);
+    unsigned short tmp = GetInstIDB(16, INSTLENGTH-1, inststr);
+    signed short t = (signed)tmp;
+    inst.other = ((signed int)t);
     return inst;
 }
 
@@ -149,11 +159,13 @@ Inst &DecSLT(std::string inststr, Inst &inst)
     return DecSpecailA(inststr, inst);
 }
 
-Inst &DecSpecialAI(std::string inststr, Inst &inst)
+Inst &DecSpecialAI(std::string inststr, Inst &inst)//signed 16bit
 {
     inst.rs = GetInstIDB(6, 10, inststr);
     inst.rt = GetInstIDB(11, 15, inststr);
-    inst.other = GetInstIDB(16, 31, inststr);
+    unsigned short tmp = GetInstIDB(16, INSTLENGTH-1, inststr);
+    signed short t = (signed)tmp;
+    inst.other = ((signed int)t);
     return inst;
 }
 
@@ -200,15 +212,15 @@ std::string GetCodeDisplay(char sip, Inst &inst)
             sprintf(tmp, "%cR%u", sip, inst.rs);
             break;
         case insttype(BEQ)://BEQ
-            sprintf(tmp, "%cR%u, R%u, #%u", sip, inst.rs, inst.rt, inst.other);
+            sprintf(tmp, "%cR%u, R%u, #%d", sip, inst.rs, inst.rt, inst.other);
             break;
         case insttype(BLTZ)://BLTZ
         case insttype(BGTZ)://BGTZ
-            sprintf(tmp, "%cR%u, #%u", sip, inst.rs, inst.other);
+            sprintf(tmp, "%cR%u, #%d", sip, inst.rs, inst.other);
             break;
         case insttype(SW)://SW
         case insttype(LW)://LW
-            sprintf(tmp, "%cR%u, %u(R%u)", sip, inst.rt, inst.other, inst.rs);
+            sprintf(tmp, "%cR%u, %d(R%u)", sip, inst.rt, inst.other, inst.rs);
             break;
         case insttype(SLL)://SLL
         case insttype(SRL)://SRL
@@ -231,12 +243,12 @@ std::string GetCodeDisplay(char sip, Inst &inst)
         case insttype(MULI)://MULI
         case insttype(NORI)://NORI
         case insttype(SLTI)://SLTI
-            sprintf(tmp, "%cR%u, R%u, #%u", sip, inst.rt, inst.rs, inst.other);
+            sprintf(tmp, "%cR%u, R%u, #%d", sip, inst.rt, inst.rs, inst.other);
             break;
         default:
             break;
     }
-
+    
 	ss<<tmp;
 	
     return ss.str();
@@ -244,7 +256,7 @@ std::string GetCodeDisplay(char sip, Inst &inst)
 
 std::string GetCodeType(Inst &inst)
 {
-    if(inst.type < sizeof(typestr))
+    if(inst.type < (signed)sizeof(typestr))
         return typestr[inst.type];
     return "";
 }
@@ -317,7 +329,7 @@ int InstDecoder::ParseFile(std::string inFile)
             else
             {
                 Inst inst;
-            
+                
                 if(GetInstIDB6(line)==0)
                 {
                     ADDMISPSpec(line, inst, isbreak);
@@ -326,11 +338,11 @@ int InstDecoder::ParseFile(std::string inFile)
                 {
                     AddMISP(line, inst);
                 }
-            
+                
                 memcpy(inst.code, line.c_str(), INSTLENGTH);
                 inst.address = address;
                 insts.push_back(inst);
-            
+                
             }
             
             address += 4;
@@ -489,7 +501,7 @@ int InstDecoder::ADDMISPSpec(std::string inststr, Inst &inst, bool &isbreak)
         default:
             break;
     }
-        
+    
     return 0;
 }
 
@@ -499,10 +511,10 @@ int instlen [6] ={6,5,5,5,5,6};
 int InstDecoder::Output(std::string fileName)
 {
     std::ofstream outstream(fileName.c_str());
-
+    
     if(outstream.is_open())
     {
-        for(int i=0; i<insts.size(); i++)
+        for(int i=0; i<(signed)insts.size(); i++)
         {
             for(int j=0; j<6; j++)
             {
@@ -531,11 +543,11 @@ int InstDecoder::Output(std::string fileName)
 #endif
         }
         
-        for(int i=0; i<datas.size(); i++)
+        for(int i=0; i<(signed)datas.size(); i++)
         {
             outstream /*<< std::left << std::setw(38)*/ << datas[i].code << '\t' << datas[i].address << '\t' << datas[i].data << std::endl;
 #ifdef TEST
-            std::cout << std::left << std::setw(38) << datas[i].code << datas[i].address << '\t' << datas[i].data << std::endl;
+            std::cout /*<< std::left << std::setw(38)*/ << datas[i].code << '\t' << datas[i].address << '\t' << datas[i].data << std::endl;
             //printf("%-38s%d\t%d\n", datas[i].code, datas[i].address, datas[i].data);
 #endif
         }

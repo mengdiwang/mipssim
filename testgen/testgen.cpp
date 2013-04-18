@@ -55,50 +55,49 @@ std::string GetArgStr(std::string line)
     return line.substr(pos+1);
 }
 
-int operationSpecial(std::string line, int &rd, int &rs, int &rt)
+void operationSpecial(std::string line, int &rd, int &rs, int &rt)
 {
     std::string linearg = GetArgStr(line);
     sscanf(linearg.c_str(), "R%d, R%d, R%d", &rd, &rs, &rt);
 }
 
-int operationBranch(std::string line, int &rs, int &offset)
+void operationBranch(std::string line, int &rs, int &offset)
 {
     std::string linearg = GetArgStr(line);
     sscanf(linearg.c_str(), "R%d, #%d", &rs, &offset);
 }
 
-int operationJ(std::string line, int &imm)
+void operationJ(std::string line, int &imm)
 {
     std::string linearg = GetArgStr(line);
     sscanf(linearg.c_str(), "#%d", &imm);
 }
 
-int operationJR(std::string line, int &rs)
+void operationJR(std::string line, int &rs)
 {
-    char dump;
     std::string linearg = GetArgStr(line);
     sscanf(linearg.c_str(),"R%d", &rs);
 }
 
-int operationShift(std::string line, int &rd, int &rt, int &sa)
+void operationShift(std::string line, int &rd, int &rt, int &sa)
 {
     std::string linearg = GetArgStr(line);
     sscanf(linearg.c_str(), "R%d, R%d, R%d", &rd, &rt, &sa);
 }
 
-int operationCat2(std::string line, int &rs, int &rt, int &im)
+void operationCat2(std::string line, int &rs, int &rt, int &im)
 {
     std::string linearg = GetArgStr(line);
     sscanf(linearg.c_str(), "R%d, R%d, #%d", &rt, &rs, &im);
 }
 
-int operationBXTZ(std::string line, int &rs, int &offset)
+void operationBXTZ(std::string line, int &rs, int &offset)
 {
     std::string linearg = GetArgStr(line);
     sscanf(linearg.c_str(), "R%d, #%d", &rs, &offset);
 }
 
-int operationXW(std::string line, int &rt, int &rs, int &offset)
+void operationXW(std::string line, int &rt, int &rs, int &offset)
 {
     std::string linearg = GetArgStr(line);
     sscanf(linearg.c_str(), "R%d, %d(R%d)", &rt, &offset, &rs);
@@ -114,7 +113,7 @@ std::string fiveb2str(int input)
     return ret;
 }
 
-std::string sixteenb2str(int input)
+std::string sixteenb2str(unsigned short input)
 {
     int LEN = 16;
     //int ori = input >> 2;
@@ -126,10 +125,11 @@ std::string sixteenb2str(int input)
 
 std::string twentyb2str(int input)
 {
+    unsigned int tmp = (unsigned) input;
     int LEN = 26;
     std::string ret = "00000000000000000000000000";
     for(int i=LEN-1; i>=0; i--)
-        ret[LEN-i-1] = ((input >> i) & 1)?'1':'0';
+        ret[LEN-i-1] = ((tmp >> i) & 1)?'1':'0';
     return ret;
     
 }
@@ -223,7 +223,7 @@ std::string GenInst(std::string line, bool &isbreak)
         operationBranch(line, rs, other);
         ret += fiveb2str(rs);
         ret += fiveb2str(rt);
-        ret += sixteenb2str(other>>2);
+        ret += sixteenb2str((signed short)other>>2);
     }
     else if(unfind && id == "BLT")
     {
@@ -232,7 +232,7 @@ std::string GenInst(std::string line, bool &isbreak)
         operationBXTZ(line, rs, other);
         ret += fiveb2str(rs);
         ret += FIVE0;
-        ret += sixteenb2str(other>>2);
+        ret += sixteenb2str((signed short)other>>2);
     }
     else if(unfind && id == "BGT")
     {
@@ -241,7 +241,7 @@ std::string GenInst(std::string line, bool &isbreak)
         operationBXTZ(line, rs, other);
         ret += fiveb2str(rs);
         ret += FIVE0;
-        ret += sixteenb2str(other>>2);
+        ret += sixteenb2str((signed short)other>>2);
     }
     else if(unfind && id == "SLL")
     {
@@ -287,7 +287,7 @@ std::string GenInst(std::string line, bool &isbreak)
             operationCat2(line, rs, rt, other);
             ret += fiveb2str(rs);
             ret += fiveb2str(rt);
-            ret += sixteenb2str(other);
+            ret += sixteenb2str((signed short)other);
         }
         else
         {
@@ -309,7 +309,7 @@ std::string GenInst(std::string line, bool &isbreak)
             operationCat2(line, rs, rt, other);
             ret += fiveb2str(rs);
             ret += fiveb2str(rt);
-            ret += sixteenb2str(other);
+            ret += sixteenb2str((signed short)other);
         }
         else
         {
@@ -331,7 +331,7 @@ std::string GenInst(std::string line, bool &isbreak)
             operationCat2(line, rs, rt, other);
             ret += fiveb2str(rs);
             ret += fiveb2str(rt);
-            ret += sixteenb2str(other);
+            ret += sixteenb2str((signed short)other);
         }
         else
         {
@@ -353,7 +353,7 @@ std::string GenInst(std::string line, bool &isbreak)
             operationCat2(line, rs, rt, other);
             ret += fiveb2str(rs);
             ret += fiveb2str(rt);
-            ret += sixteenb2str(other);
+            ret += sixteenb2str((signed short)other);
         }
         else
         {
@@ -386,7 +386,7 @@ std::string GenInst(std::string line, bool &isbreak)
             operationCat2(line, rs, rt, other);
             ret += fiveb2str(rs);
             ret += fiveb2str(rt);
-            ret += sixteenb2str(other);
+            ret += sixteenb2str((signed short)other);
         }
         else
         {
@@ -408,7 +408,7 @@ std::string GenInst(std::string line, bool &isbreak)
             operationCat2(line, rs, rt, other);
             ret += fiveb2str(rs);
             ret += fiveb2str(rt);
-            ret += sixteenb2str(other);
+            ret += sixteenb2str((signed short)other);
         }
         else
         {
