@@ -18,10 +18,9 @@ simply 'make' to build MIPSsim
 
 running
 -------
-./MIPSsim <input>
-<input>  : found input instruction files, e.g. sample.txt
-<output> : disassembly.txt	
-		 : simulation.txt	
+./MIPSsim input
++ input  : found input instruction files, e.g. sample.txt
++ output : disassembly.txt, simulation.txt	
 
 Layout of the source tree
 =========================
