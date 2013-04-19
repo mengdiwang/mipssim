@@ -61,10 +61,10 @@ void operationSpecial(std::string line, int &rd, int &rs, int &rt)
     sscanf(linearg.c_str(), "R%d, R%d, R%d", &rd, &rs, &rt);
 }
 
-void operationBranch(std::string line, int &rs, int &offset)
+void operationBranch(std::string line, int &rs, int &rt, int &offset)
 {
     std::string linearg = GetArgStr(line);
-    sscanf(linearg.c_str(), "R%d, #%d", &rs, &offset);
+    sscanf(linearg.c_str(), "R%d, R%d, #%d", &rs, &rt, &offset);
 }
 
 void operationJ(std::string line, int &imm)
@@ -82,7 +82,7 @@ void operationJR(std::string line, int &rs)
 void operationShift(std::string line, int &rd, int &rt, int &sa)
 {
     std::string linearg = GetArgStr(line);
-    sscanf(linearg.c_str(), "R%d, R%d, R%d", &rd, &rt, &sa);
+    sscanf(linearg.c_str(), "R%d, R%d, #%d", &rd, &rt, &sa);
 }
 
 void operationCat2(std::string line, int &rs, int &rt, int &im)
@@ -220,10 +220,11 @@ std::string GenInst(std::string line, bool &isbreak)
     {
         unfind = false;
         ret += "000100";
-        operationBranch(line, rs, other);
+        operationBranch(line, rs, rt, other);
         ret += fiveb2str(rs);
         ret += fiveb2str(rt);
-        ret += sixteenb2str((signed short)other>>2);
+        int tmp = other >> 2;
+        ret += sixteenb2str((signed short)(tmp));
     }
     else if(unfind && id == "BLT")
     {
@@ -232,7 +233,8 @@ std::string GenInst(std::string line, bool &isbreak)
         operationBXTZ(line, rs, other);
         ret += fiveb2str(rs);
         ret += FIVE0;
-        ret += sixteenb2str((signed short)other>>2);
+        int tmp = other >> 2;
+        ret += sixteenb2str((signed short)(tmp));
     }
     else if(unfind && id == "BGT")
     {
@@ -241,7 +243,8 @@ std::string GenInst(std::string line, bool &isbreak)
         operationBXTZ(line, rs, other);
         ret += fiveb2str(rs);
         ret += FIVE0;
-        ret += sixteenb2str((signed short)other>>2);
+        int tmp = other >> 2;
+        ret += sixteenb2str((signed short)(tmp));
     }
     else if(unfind && id == "SLL")
     {

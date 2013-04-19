@@ -6,7 +6,7 @@
 //  Copyright (c) 2013年 Mengdi Wang. All rights reserved.
 //
 
-#define TEST
+//#define TEST
 
 #include "instSimulator.h"
 #include <sstream>
