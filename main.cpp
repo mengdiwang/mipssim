@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include "instDecoder.h"
 #include "instSimulator.h"
+#include "sbplSimulator.h"
 //test
 //#include <unistd.h>
 
@@ -28,12 +29,17 @@ int main(int argc, const char * argv[])
     InstDecoder decoder;
 
     decoder.Decode(argv[1]);
-	decoder.Output("disassembly.txt");
+	
+    SbInstSim sbSim;
+    sbSim.Run(decoder);
     
-    InstSim simulator;
-    simulator.Run(decoder);
     
-    simulator.Output("simulation.txt");
+    //decoder.Output("disassembly.txt");
+    
+    //InstSim simulator;
+    //simulator.Run(decoder);
+    
+    //simulator.Output("simulation.txt");
     
 	return 0;
 }

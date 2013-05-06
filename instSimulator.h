@@ -13,9 +13,6 @@
 #include "constdef.h"
 #include <vector>
 
-const int REGISTERNUM = 32;
-const int MEMUNIT = 4;
-
 class InstSim
 {
 public:
@@ -27,7 +24,7 @@ public:
     int Run(InstDecoder &instdec);
     int Output(std::string fileName);
     
-private:
+protected:
     void SetMem(const std::vector<Data> &mm)
     {
         mem = mm;
@@ -61,7 +58,7 @@ private:
         r[idx] = data;
     }
 
-private:
+protected:
     int MemBase;
     int r[REGISTERNUM];
     std::vector<Data> mem;
