@@ -5,10 +5,14 @@
 //  Created by Mengdi Wang on 13-4-18.
 //  Copyright (c) 2013年 Mengdi Wang. All rights reserved.
 //
-
 #ifndef MISPsim_Const_h
 #define MISPsim_Const_h
+#include <string>
+#include <deque>
+#include <memory.h>
 //--------------------------------------------------------------------------
+const int REGISTERNUM   = 32;
+const int MEMUNIT       = 4;
 const int ADDBASE       = 64;
 const int INSTLENGTH    = 32;
 const int IMMOFFSET     = 2;
@@ -74,5 +78,86 @@ const int IDOR      = 0x25;//100101
 const int IDXOR     = 0x26;//100110
 const int IDNOR     = 0x27;//100111
 const int IDSLT     = 0x2A;//101010
+//--------------------------------------------------------------------------
+const std::string waitlistStr[8] =
+{
+    "IF Unit",
+    "Pre-Issue Buffer",
+	"Pre-ALU Queue",
+    "Post-ALU Buffer",
+    "Pre-ALUB Queue",
+	"Post-ALUB Buffer",
+    "Pre-MEM Queue",
+	"Post-MEM Buffer"
+};
+//--------------------------------------------------------------------------
+enum buffertype
+{
+    IFUNIT      = 0,
+    PREISSUE    = 1,
+    PREALU      = 2,
+    POSTALU     = 3,
+    PREALUB     = 4,
+    POSTALUB    = 5,
+    PREMEM      = 6,
+    POSTMEM     = 7
+};
+//--------------------------------------------------------------------------
+class Inst
+{
+public:
+    Inst():address(0),other(0),rs(0),rt(0),rd(0),sa(0),state(0)
+    {
+        memset(code, 0, sizeof(code));
+    }
+    std::string OutType();
+    
+public:
+    unsigned int address;
+    int other;
+    insttype type;
+    unsigned short rs;
+    unsigned short rt;
+    unsigned short rd;
+    unsigned short sa;
+    char code[32+2];
+};
+//--------------------------------------------------------------------------
+class InstBuffer
+{
+public:
+    InstBuffer():cur(0),max(4)
+    {
+        //memset(state, 0, sizeof(state));
+    }
+    
+    InstBuffer(int _max)
+    {
+        cur = 0;
+        max = _max;
+        //memset(state, 0, sizeof(state));
+    }
+    
+public:
+    int cur;
+    int max;
+    //int state[4];
+    std::deque<Inst> buffer;
+
+};
+//--------------------------------------------------------------------------
+class Data
+{
+public:
+    Data():data(0),address(0),busy(false)
+    {
+        memset(code, 0, sizeof(code));
+    }
+public:
+    int data;
+    unsigned int address;
+    char code[32+2];
+    bool busy;//?
+};
 //--------------------------------------------------------------------------
 #endif
