@@ -199,6 +199,61 @@ Inst &DecSLTI(std::string inststr, Inst &inst)
     return DecSpecialAI(inststr, inst);
 }
 
+std::string GetCodeDisplaySb(char sip, Inst &inst, char sipl)
+{
+    char tmp[100] = {0};
+    std::stringstream ss;
+    switch(inst.type)
+    {
+        case insttype(J)://J
+            sprintf(tmp, "%c#%u%c", sip, inst.other, sipl);
+            break;
+        case insttype(JR)://JR
+            sprintf(tmp, "%cR%u%c", sip, inst.rs, sipl);
+            break;
+        case insttype(BEQ)://BEQ
+            sprintf(tmp, "%cR%u, R%u, #%d%c", sip, inst.rs, inst.rt, inst.other, sipl);
+            break;
+        case insttype(BLTZ)://BLTZ
+        case insttype(BGTZ)://BGTZ
+            sprintf(tmp, "%cR%u, #%d%c", sip, inst.rs, inst.other, sipl);
+            break;
+        case insttype(SW)://SW
+        case insttype(LW)://LW
+            sprintf(tmp, "%cR%u, %d(R%u)%c", sip, inst.rt, inst.other, inst.rs, sipl);
+            break;
+        case insttype(SLL)://SLL
+        case insttype(SRL)://SRL
+        case insttype(SRA)://SRA
+            sprintf(tmp, "%cR%u, R%u, #%u%c", sip, inst.rd, inst.rt, inst.sa, sipl);
+            break;
+        case insttype(ADD)://ADD
+        case insttype(SUB)://SUB
+        case insttype(MUL)://MUL
+        case insttype(AND)://AND
+        case insttype(OR)://OR
+        case insttype(XOR)://XOR
+        case insttype(NOR)://NOR
+        case insttype(SLT)://SLT
+            sprintf(tmp, "%cR%u, R%u, R%u%c", sip, inst.rd, inst.rs, inst.rt, sipl);
+            break;
+        case insttype(ADDI)://ADDI
+        case insttype(ANDI)://ANDI
+        case insttype(SUBI)://SUBI
+        case insttype(MULI)://MULI
+        case insttype(NORI)://NORI
+        case insttype(SLTI)://SLTI
+            sprintf(tmp, "%cR%u, R%u, #%d%c", sip, inst.rt, inst.rs, inst.other, sipl);
+            break;
+        default:
+            break;
+    }
+    
+	ss<<tmp;
+	
+    return ss.str();
+}
+
 std::string GetCodeDisplay(char sip, Inst &inst)
 {
     char tmp[100] = {0};
@@ -253,6 +308,7 @@ std::string GetCodeDisplay(char sip, Inst &inst)
 	
     return ss.str();
 }
+
 
 std::string GetCodeType(Inst &inst)
 {
