@@ -382,7 +382,7 @@ void SbInstSim::Exec_st()
             CodeExec(inst, codeidx, jump);
             
             inst.cycle = cycle;
-            buffers[POSTALU].clear();
+            //buffers[POSTALU].clear();
             buffers[POSTALU].push_back(inst);
             //quecycle[POSTALU] = cycle;
         }
@@ -398,7 +398,7 @@ void SbInstSim::Exec_st()
             CodeExec(inst, codeidx, jump);
         
             inst.cycle = cycle;
-            buffers[POSTALUB].clear();
+            //buffers[POSTALUB].clear();
             buffers[POSTALUB].push_back(inst);
             //quecycle[POSTALUB] = cycle;
         }
@@ -415,7 +415,7 @@ void SbInstSim::Exec_st()
             if(inst.type == LW)
             {
                 inst.cycle = cycle;
-                buffers[POSTMEM].clear();
+                //buffers[POSTMEM].clear();
                 buffers[POSTMEM].push_back(inst);
                 //quecycle[POSTMEM] = cycle;
             }
@@ -435,7 +435,7 @@ void SbInstSim::WB_st()
         Inst inst = buffers[POSTALU].front();
         if(inst.cycle<cycle)
         {
-            buffers[POSTALU].clear();
+            buffers[POSTALU].erase(buffers[POSTALU].begin());
             result[inst.rd] = NIL;
         }
     }
@@ -444,7 +444,7 @@ void SbInstSim::WB_st()
         Inst inst = buffers[POSTALUB].front();
         if(inst.cycle<cycle)
         {
-            buffers[POSTALUB].clear();
+            buffers[POSTALUB].erase(buffers[POSTALUB].begin());
             result[inst.rd] = NIL;
         }
     }
@@ -453,7 +453,7 @@ void SbInstSim::WB_st()
         Inst inst = buffers[POSTMEM].front();
         if(inst.cycle < cycle)
         {
-            buffers[POSTMEM].clear();
+            buffers[POSTMEM].erase(buffers[POSTMEM].begin());
             result[inst.rd] = NIL;
         }
     }
@@ -470,7 +470,7 @@ void SbInstSim::Run(InstDecoder &instdec)
     while(true)
     {
         int tmp=0;
-        if(cycle==6)
+        if(cycle==3)
             tmp=0;
             
         if(ifstate==4)
