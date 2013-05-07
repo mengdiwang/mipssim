@@ -22,7 +22,7 @@ const std::string typestr[28] = {"J", "JR", "BEQ", "BLTZ", "BGTZ", "BREAK", "SW"
 //--------------------------------------------------------------------------
 enum insttype
 {
-    NIL		= -1,
+    NIL		= 1024,
     J		= 0,
     JR		= 1,
     BEQ		= 2,
@@ -100,13 +100,14 @@ enum buffertype
     PREALUB     = 4,
     POSTALUB    = 5,
     PREMEM      = 6,
-    POSTMEM     = 7
+    POSTMEM     = 7,
+    EXEC        = 8
 };
 //--------------------------------------------------------------------------
 class Inst
 {
 public:
-    Inst():address(0),other(0),rs(0),rt(0),rd(0),sa(0),state(0)
+    Inst():address(0),other(0),rs(-1),rt(-1),rd(-1),sa(0),cycle(0)
     {
         memset(code, 0, sizeof(code));
     }
@@ -116,6 +117,7 @@ public:
     unsigned int address;
     int other;
     insttype type;
+    int cycle;
     unsigned short rs;
     unsigned short rt;
     unsigned short rd;
@@ -126,7 +128,7 @@ public:
 class InstBuffer
 {
 public:
-    InstBuffer():cur(0),max(4)
+    InstBuffer():cur(0),max(4),cycle(0)
     {
         //memset(state, 0, sizeof(state));
     }
@@ -135,12 +137,14 @@ public:
     {
         cur = 0;
         max = _max;
+        cycle = 0;
         //memset(state, 0, sizeof(state));
     }
     
 public:
     int cur;
     int max;
+    int cycle;
     //int state[4];
     std::deque<Inst> buffer;
 

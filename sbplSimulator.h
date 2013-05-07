@@ -18,27 +18,41 @@
 class SbInstSim:public InstSim
 {
 public:
-    SbInstSim():pc(0),stalled(false)
+    SbInstSim():pc(0),ifstate(0),cycle(1)
     {
         for(int i=0; i<REGISTERNUM; i++)
-        {
-            isrready[i] = true;
-        }
+            result[i] = NIL;
+        
+        memset(quecycle, 0, sizeof(quecycle));
     }
     
     void Run(InstDecoder &instdec);
+    
+private:
     void IF_st(InstDecoder &instdec);
     void ISSUE_st();
     void Exec_st();
     void WB_st();
+    
+    bool Chkhzd(Inst inst, int pos);//not reference to prevent side effect
+    bool ChkWAR(int rd, int pos);
+    bool ChkWAW(int rd, int pos);
+    bool ChkRAW(int rj, int rk, int pos);
+    bool ChkNoSW(int pos);
+    
     friend void OStream(std::ostream &outs, int cycle, SbInstSim &sim);
     friend void SStream(std::stringstream &outs, int cycle, SbInstSim &sim);
     
 private:
     int pc;
-    InstBuffer buffers[8];
-    bool isrready[REGISTERNUM];
-    bool stalled;
+    int cycle;
+    int ifstate;//1:stalled. 2:execute. 3:nop. 4:break.
+    //InstBuffer buffers[9];
+    std::vector<Inst> buffers[9];
+    int quecycle[8];
+    int result[REGISTERNUM];
 };
+
+std::string GetCodeDisplaySb(char sip, Inst &inst, char sipl);
 
 #endif
