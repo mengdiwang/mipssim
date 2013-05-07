@@ -103,7 +103,7 @@ int InstSim::Run(InstDecoder &instdec)
             case insttype(NOR)://NOR
                 r[i.rd] = (signed)(~((unsigned)r[i.rs] | (unsigned)r[i.rt])); break;
             case insttype(SLT)://SLT
-                r[i.rd] = (r[i.rs] < r[i.rs])?1:0; break;
+                r[i.rd] = (r[i.rs] < r[i.rt])?1:0; break;
             case insttype(ADDI)://ADDI
                 r[i.rt] = r[i.rs] + i.other; break;
             case insttype(ANDI)://ANDI
