@@ -107,7 +107,7 @@ enum buffertype
 class Inst
 {
 public:
-    Inst():address(0),other(0),rs(-1),rt(-1),rd(-1),sa(0),cycle(0)
+    Inst():address(0),other(0),rs(1024),rt(1024),rd(1024),sa(0),cycle(0)
     {
         memset(code, 0, sizeof(code));
     }

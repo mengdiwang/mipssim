@@ -233,7 +233,8 @@ bool SbInstSim::ChkRAW(int rj, int rk, int pos)
         }
     }
 */
-    if((rj>0 && result[rj]!=NIL) || (rk>0 && result[rk]!=NIL))
+    if((rj!=1024 && result[rj]!=NIL) || (rk!=1024 && result[rk]!=NIL))
+        return true;
     
     return false;
 }
@@ -381,12 +382,13 @@ void SbInstSim::Exec_st()
             CodeExec(inst, codeidx, jump);
             
             inst.cycle = cycle;
+            buffers[POSTALU].clear();
             buffers[POSTALU].push_back(inst);
             //quecycle[POSTALU] = cycle;
         }
         
     }
-    if(buffers[PREALUB].size()>0)
+    else if(buffers[PREALUB].size()>0)
     {
         Inst inst = buffers[PREALUB].front();
         if(inst.cycle < cycle)
@@ -396,11 +398,12 @@ void SbInstSim::Exec_st()
             CodeExec(inst, codeidx, jump);
         
             inst.cycle = cycle;
+            buffers[POSTALUB].clear();
             buffers[POSTALUB].push_back(inst);
             //quecycle[POSTALUB] = cycle;
         }
     }
-    if(buffers[PREMEM].size()>0)
+    else if(buffers[PREMEM].size()>0)
     {
         Inst inst = buffers[PREMEM].front();
         if(inst.cycle < cycle)
@@ -412,6 +415,7 @@ void SbInstSim::Exec_st()
             if(inst.type == LW)
             {
                 inst.cycle = cycle;
+                buffers[POSTMEM].clear();
                 buffers[POSTMEM].push_back(inst);
                 //quecycle[POSTMEM] = cycle;
             }
@@ -435,7 +439,7 @@ void SbInstSim::WB_st()
             result[inst.rd] = NIL;
         }
     }
-    if(buffers[POSTALUB].size()>0)
+    else if(buffers[POSTALUB].size()>0)
     {
         Inst inst = buffers[POSTALUB].front();
         if(inst.cycle<cycle)
@@ -444,7 +448,7 @@ void SbInstSim::WB_st()
             result[inst.rd] = NIL;
         }
     }
-    if(buffers[POSTMEM].size()>0)
+    else if(buffers[POSTMEM].size()>0)
     {
         Inst inst = buffers[POSTMEM].front();
         if(inst.cycle < cycle)
@@ -465,6 +469,10 @@ void SbInstSim::Run(InstDecoder &instdec)
     
     while(true)
     {
+        int tmp=0;
+        if(cycle==6)
+            tmp=0;
+            
         if(ifstate==4)
             break;
         
@@ -615,8 +623,8 @@ void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
     outs << std::endl;
     
     outs << "\tEntry 1:";
-    if(sim.buffers[PREALUB].size()>0)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREALUB][0], ']');
+    if(sim.buffers[PREALUB].size()>1)
+        outs<< GetCodeDisplaySb('[', sim.buffers[PREALUB][1], ']');
     outs << std::endl;
     
     outs << "Post-ALUB Buffer:";
@@ -631,8 +639,8 @@ void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
     outs << std::endl;
     
     outs << "\tEntry 1:";
-    if(sim.buffers[PREMEM].size()>0)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREMEM][0], ']');
+    if(sim.buffers[PREMEM].size()>1)
+        outs<< GetCodeDisplaySb('[', sim.buffers[PREMEM][1], ']');
     outs << std::endl;
     
     outs << "Post-MEM Buffer:";
