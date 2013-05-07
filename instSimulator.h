@@ -58,6 +58,8 @@ protected:
         r[idx] = data;
     }
 
+    bool CodeExec(Inst i, int &codeidx, bool &jump);
+    
 protected:
     int MemBase;
     int r[REGISTERNUM];
