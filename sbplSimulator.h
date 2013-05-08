@@ -30,7 +30,7 @@ public:
     void Run(InstDecoder &instdec);
     
 private:
-    void IF_st(InstDecoder &instdec);
+    bool IF_st(InstDecoder &instdec);
     void ISSUE_st();
     void Exec_st();
     void WB_st();
@@ -54,6 +54,8 @@ private:
     std::queue<ExecData> postqueues[3];
     int quecycle[8];
     int result[REGISTERNUM];
+    std::string waitstr;
+    std::string execstr;
 };
 
 std::string GetCodeDisplaySb(std::string sip, Inst &inst, std::string sipl);

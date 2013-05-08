@@ -136,90 +136,70 @@ bool SbInstSim::PLCodeExec(Inst i, int &val)
     }
 }
 
-void SbInstSim::IF_st(InstDecoder &instdec)
+bool SbInstSim::IF_st(InstDecoder &instdec)
 {
-    std::vector<Inst> &ifqueue = buffers[IFUNIT];
     std::vector<Inst> &preisqueue = buffers[PREISSUE];
+    bool isbreak = false;
+    bool isbranch = false;
+    bool jump;
+    bool stalled = false;;
     
-    if(ifstate == 1)
-    {
-        Inst inst = ifqueue[0];
-        if(!ChkRAW(inst.rs, inst.rt, preisqueue.size()))
-        {
-            ifstate = 2;
-            //JUMP??
-            return;
-        }
-    }
-    else if(ifstate == 2)
-    {
-        //jump
-        bool jump;
-        CodeExec(ifqueue[0], pc, jump);
-        
-        ifqueue.erase(ifqueue.begin());//?clear
-        //ifqueue.pop_front();
-        
-        ifstate = 0;
-        return;
-    }
-    else if(ifstate == 4)
-    {
-#ifdef TEST
-        assert(0);
-#endif
-        return;//
-    }
-        
     for(int i=0; i<2; i++)
     {
         Inst inst;
-        if(!ifstate && preisqueue.size()<4 && ifqueue.size()<2)
+        if(!isbranch && preisqueue.size()<4)
         {
-            inst = instdec.GetInsts()[pc++];
+            inst = instdec.GetInsts()[pc];
             
             switch (inst.type) {
                 case JR:
                 case BEQ:
                 case BLTZ:
                 case BGTZ:
-                    inst.cycle = cycle;
-                    ifqueue.push_back(inst);
-                    //quecycle[IFUNIT] = cycle;
+                case J:
+                    isbranch = true;
                     if(ChkRAW(inst.rs, inst.rt, preisqueue.size()))
                     {
-                        ifstate = 1;//stall
+                        waitstr = GetCodeDisplaySb("", inst, "");
+                        execstr = "";
+                        stalled = true;
                     }
                     else
                     {
-                        ifstate = 2;//execute
+                        pc ++;
+                        CodeExec(inst, pc, jump);
+                        execstr = GetCodeDisplaySb("", inst, "");
+                        waitstr = "";
                     }
                     break;
-                case J:
-                    inst.cycle = cycle;
-                    ifqueue.push_back(inst);
-                    //quecycle[IFUNIT] = cycle;
-                    ifstate = 2;
-                    break;
                 case NOP:
+                    pc++;
+                    waitstr = "";
+                    execstr = "";
                     break;
                 case BREAK:
-                    ifstate = 4;
+                    isbreak = true;
+                    pc++;
+                    waitstr = "";
+                    execstr = "";
                     break;
                 default:
                     //other instuctions treat as obmit ifqueue and push to the pre issue queue directly
                     inst.cycle = cycle;
                     preisqueue.push_back(inst);
-                    ///quecycle[PREISSUE] = cycle;
+                    pc++;
+                    waitstr = "";
+                    execstr = "";
                     break;
             }
-            if(i==0 && ifstate && preisqueue.size()<4 && ifqueue.size()<2)
+            if(i==0 && !isbranch && preisqueue.size()<3)
             {
                 if(instdec.GetInsts()[pc+1].type==BREAK)
-                    ifstate = 4;
+                    isbreak = true;
             }
         }
     }
+    return isbreak;
 }
 
 //write after read.
@@ -340,7 +320,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
             
             break;
             
-        case LW:
+        case LW://LW
         case SW://MEM ????
             HasunisSW = ChkNoSW(pos);
             WARhazard = ChkWAR(inst.rd, pos);
@@ -443,7 +423,7 @@ void SbInstSim::Exec_st()
             PLCodeExec(inst, val);
             
             ExecData ed(inst.rd, val);
-            postqueues[POSTALU].push(ed);
+            postqueues[QPOSTALU].push(ed);
             inst.cycle = cycle;
             buffers[POSTALU].push_back(inst);
         }
@@ -452,7 +432,7 @@ void SbInstSim::Exec_st()
     else if(buffers[PREALUB].size()>0)
     {
         Inst inst = buffers[PREALUB].front();
-        if(inst.cycle < cycle)
+        if(inst.cycle+1 < cycle)
         {
             buffers[PREALUB].erase(buffers[PREALUB].begin());
         
@@ -462,7 +442,7 @@ void SbInstSim::Exec_st()
             PLCodeExec(inst, val);
             
             ExecData ed(inst.rd, val);
-            postqueues[POSTALUB].push(ed);
+            postqueues[QPOSTALUB].push(ed);
             inst.cycle = cycle;
             buffers[POSTALUB].push_back(inst);
         }
@@ -480,7 +460,7 @@ void SbInstSim::Exec_st()
         
             if(inst.type == LW)
             {
-                postqueues[POSTMEM].push(ed);
+                postqueues[QPOSTMEM].push(ed);
                 inst.cycle = cycle;
                 buffers[POSTMEM].push_back(inst);
             }
@@ -495,38 +475,38 @@ void SbInstSim::Exec_st()
 
 void SbInstSim::WB_st()
 {
-    if(postqueues[POSTALU].size()>0)
+    if(postqueues[QPOSTALU].size()>0)
     {
-        ExecData data = postqueues[POSTALU].front();
+        ExecData data = postqueues[QPOSTALU].front();
         Inst inst = buffers[POSTALU].front();
         if(inst.cycle<cycle)
         {
             r[data.rd] = data.data;
-            postqueues[POSTALU].pop();
+            postqueues[QPOSTALU].pop();
             buffers[POSTALU].erase(buffers[POSTALU].begin());
             result[data.rd] = NIL;
         }
     }
-    else if(postqueues[POSTALUB].size()>0)
+    else if(postqueues[QPOSTALUB].size()>0)
     {
-        ExecData data = postqueues[POSTALUB].front();
+        ExecData data = postqueues[QPOSTALUB].front();
         Inst inst = buffers[POSTALUB].front();
         if(inst.cycle<cycle)
         {
             r[data.rd] = data.data;
-            postqueues[POSTALUB].pop();
+            postqueues[QPOSTALUB].pop();
             buffers[POSTALUB].erase(buffers[POSTALUB].begin());
             result[data.rd] = NIL;
         }
     }
-    else if(postqueues[POSTMEM].size()>0)
+    else if(postqueues[QPOSTMEM].size()>0)
     {
-        ExecData data = postqueues[POSTMEM].front();
+        ExecData data = postqueues[QPOSTMEM].front();
         Inst inst = buffers[POSTMEM].front();
         if(inst.cycle < cycle)
         {
             r[data.rd] = data.data;
-            postqueues[POSTMEM].pop();
+            postqueues[QPOSTMEM].pop();
             buffers[POSTMEM].erase(buffers[POSTMEM].begin());
             result[data.rd] = NIL;
         }
@@ -535,6 +515,7 @@ void SbInstSim::WB_st()
 
 void SbInstSim::Run(InstDecoder &instdec)
 {
+    bool isbreak = false;
     int ret = 0;
     int codeidx = 0;
     std::stringstream stepoutput;
@@ -547,10 +528,10 @@ void SbInstSim::Run(InstDecoder &instdec)
         if(cycle==16)
             tmp=0;
             
-        if(ifstate==4)
+        if(isbreak)
             break;
         
-        IF_st(instdec);
+        isbreak = IF_st(instdec);
         
         ISSUE_st();
         
@@ -566,7 +547,7 @@ void SbInstSim::Run(InstDecoder &instdec)
 #ifdef TEST
         OStream(std::cout, cycle, *this);
         
-        if(cycle > 100)
+        if(cycle > 1000)
             break;
 #endif
         //---------------------------------------------------------        
@@ -643,13 +624,17 @@ void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
     
     outs << "IF Unit:\n";
     outs << "\tWaiting Instruction: ";
-    if(sim.ifstate==1)
-        outs<<  GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
+    //if(sim.ifstate==1)
+    //    outs<<  GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
+    //if(sim.waitstr!="")
+        outs << sim.waitstr;
     outs << std::endl;
     
     outs << "\tExecuted Instruction: ";
-    if(sim.ifstate==2)
-        outs<< GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
+    //if(sim.ifstate==2)
+    //    outs<< GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
+    //if(sim.execstr!="")
+        outs << sim.execstr;
     outs << std::endl;
     
     outs << "Pre-Issue Buffer:\n";
