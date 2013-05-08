@@ -19,7 +19,7 @@
 class SbInstSim:public InstSim
 {
 public:
-    SbInstSim():pc(0),ifstate(0),cycle(1)
+    SbInstSim():pc(0),cycle(1)
     {
         for(int i=0; i<REGISTERNUM; i++)
             result[i] = NIL;
@@ -48,9 +48,7 @@ private:
 private:
     int pc;
     int cycle;
-    int ifstate;//1:stalled. 2:execute. 3:nop. 4:break.
-    //InstBuffer buffers[9];
-    std::vector<Inst> buffers[9];
+    std::vector<Inst> buffers[8];
     std::queue<ExecData> postqueues[3];
     int quecycle[8];
     int result[REGISTERNUM];
