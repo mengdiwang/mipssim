@@ -22,33 +22,33 @@
 void OStream(std::ostream &outs, int cycle, SbInstSim &sim);
 void SStream(std::stringstream &outs, int cycle, SbInstSim &sim);
 
-std::string GetCodeDisplaySb(char sip, Inst &inst, char sipl)
+std::string GetCodeDisplaySb(std::string sip, Inst &inst, std::string sipl)
 {
     char tmp[100] = {0};
     std::stringstream ss;
     switch(inst.type)
     {
         case insttype(J)://J
-            sprintf(tmp, "#%u%c", inst.other, sipl);
+            sprintf(tmp, "#%u%s", inst.other, sipl.c_str());
             break;
         case insttype(JR)://JR
-            sprintf(tmp, "R%u%c", inst.rs, sipl);
+            sprintf(tmp, "R%u%s", inst.rs, sipl.c_str());
             break;
         case insttype(BEQ)://BEQ
-            sprintf(tmp, "R%u, R%u, #%d%c", inst.rs, inst.rt, inst.other, sipl);
+            sprintf(tmp, "R%u, R%u, #%d%s", inst.rs, inst.rt, inst.other, sipl.c_str());
             break;
         case insttype(BLTZ)://BLTZ
         case insttype(BGTZ)://BGTZ
-            sprintf(tmp, "R%u, #%d%c", inst.rs, inst.other, sipl);
+            sprintf(tmp, "R%u, #%d%s", inst.rs, inst.other, sipl.c_str());
             break;
         case insttype(SW)://SW
         case insttype(LW)://LW
-            sprintf(tmp, "R%u, %d(R%u)%c", inst.rd, inst.other, inst.rs, sipl);
+            sprintf(tmp, "R%u, %d(R%u)%s", inst.rd, inst.other, inst.rs, sipl.c_str());
             break;
         case insttype(SLL)://SLL
         case insttype(SRL)://SRL
         case insttype(SRA)://SRA
-            sprintf(tmp, "R%u, R%u, #%u%c", inst.rd, inst.rt, inst.sa, sipl);
+            sprintf(tmp, "R%u, R%u, #%u%s", inst.rd, inst.rt, inst.sa, sipl.c_str());
             break;
         case insttype(ADD)://ADD
         case insttype(SUB)://SUB
@@ -58,7 +58,7 @@ std::string GetCodeDisplaySb(char sip, Inst &inst, char sipl)
         case insttype(XOR)://XOR
         case insttype(NOR)://NOR
         case insttype(SLT)://SLT
-            sprintf(tmp, "R%u, R%u, R%u%c", inst.rd, inst.rs, inst.rt, sipl);
+            sprintf(tmp, "R%u, R%u, R%u%s", inst.rd, inst.rs, inst.rt, sipl.c_str());
             break;
         case insttype(ADDI)://ADDI
         case insttype(ANDI)://ANDI
@@ -66,7 +66,7 @@ std::string GetCodeDisplaySb(char sip, Inst &inst, char sipl)
         case insttype(MULI)://MULI
         case insttype(NORI)://NORI
         case insttype(SLTI)://SLTI
-            sprintf(tmp, "R%u, R%u, #%d%c", inst.rd, inst.rs, inst.other, sipl);
+            sprintf(tmp, "R%u, R%u, #%d%s", inst.rd, inst.rs, inst.other, sipl.c_str());
             break;
         default:
             break;
@@ -77,6 +77,63 @@ std::string GetCodeDisplaySb(char sip, Inst &inst, char sipl)
 	ss<<tmp;
 	
     return ss.str();
+}
+
+bool SbInstSim::PLCodeExec(Inst i, int &val)
+{
+    switch (i.type)
+    {
+        case insttype(SW)://SW
+            //val = r[i.rs] + i.other;
+            SetMembyAddr(r[i.rs] + i.other, r[i.rd]); break;
+        case insttype(LW)://LW rt <- memory[r[base] + offset]
+        {
+            val = r[i.rs] + i.other;
+            int data = 0;
+            if(GetMembyAddr(r[i.rs] + i.other, data))
+                //r[i.rd] = data;
+                val = data;
+        }
+            break;
+        case insttype(SLL)://SLL
+            val = r[i.rt] << i.sa; break;
+        case insttype(SRL)://SRL
+            val = (signed)((unsigned)r[i.rt] >> i.sa); break; //Logic right shift does not remain sign bit
+        case insttype(SRA)://SRA
+            val = r[i.rt] >> i.sa; break;
+        case insttype(NOP)://NOP
+            break;
+        case insttype(ADD)://ADD
+            val = r[i.rs] + r[i.rt]; break;
+        case insttype(SUB)://SUB
+            val = r[i.rs] - r[i.rt]; break;
+        case insttype(MUL)://MUL
+            val = r[i.rs] * r[i.rt]; break;
+        case insttype(AND)://AND
+            val = r[i.rs] & r[i.rt]; break;
+        case insttype(OR)://OR
+            val = r[i.rs] | r[i.rt]; break;
+        case insttype(XOR)://XOR
+            val = r[i.rs] ^ r[i.rt]; break;
+        case insttype(NOR)://NOR
+            val = (signed)(~((unsigned)r[i.rs] | (unsigned)r[i.rt])); break;
+        case insttype(SLT)://SLT
+            val = (r[i.rs] < r[i.rt])?1:0; break;
+        case insttype(ADDI)://ADDI
+            val = r[i.rs] + i.other; break;
+        case insttype(ANDI)://ANDI
+            val = r[i.rs] & i.other; break;
+        case insttype(SUBI)://SUBI
+            val = r[i.rs] - i.other; break;
+        case insttype(MULI)://MULI
+            val = r[i.rs] * i.other; break;
+        case insttype(NORI)://NORI
+            val = (signed)(~((unsigned)r[i.rs] | (unsigned)i.other)); break;
+        case insttype(SLTI)://SLTI
+            val = (r[i.rs] < i.other)?1:0; break;
+        default:
+            break;
+    }
 }
 
 void SbInstSim::IF_st(InstDecoder &instdec)
@@ -333,7 +390,8 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
     if(canissued)
     {
         //buffers[EXEC].push_back(inst);
-        result[inst.rd] = inst.type;
+        if(inst.type!=SW)
+            result[inst.rd] = inst.type;
     }
     
     return canissued;
@@ -379,12 +437,15 @@ void SbInstSim::Exec_st()
         {
             buffers[PREALU].erase(buffers[PREALU].begin());
         
-            CodeExec(inst, codeidx, jump);
+            //CodeExec(inst, codeidx, jump);
             
+            int val;
+            PLCodeExec(inst, val);
+            
+            ExecData ed(inst.rd, val);
+            postqueues[POSTALU].push(ed);
             inst.cycle = cycle;
-            //buffers[POSTALU].clear();
             buffers[POSTALU].push_back(inst);
-            //quecycle[POSTALU] = cycle;
         }
         
     }
@@ -395,12 +456,15 @@ void SbInstSim::Exec_st()
         {
             buffers[PREALUB].erase(buffers[PREALUB].begin());
         
-            CodeExec(inst, codeidx, jump);
+            //CodeExec(inst, codeidx, jump);
         
+            int val;
+            PLCodeExec(inst, val);
+            
+            ExecData ed(inst.rd, val);
+            postqueues[POSTALUB].push(ed);
             inst.cycle = cycle;
-            //buffers[POSTALUB].clear();
             buffers[POSTALUB].push_back(inst);
-            //quecycle[POSTALUB] = cycle;
         }
     }
     else if(buffers[PREMEM].size()>0)
@@ -410,18 +474,19 @@ void SbInstSim::Exec_st()
         {
             buffers[PREMEM].erase(buffers[PREMEM].begin());
         
-            CodeExec(inst, codeidx, jump);
+            int val;
+            PLCodeExec(inst, val);
+            ExecData ed(inst.rd, val);
         
             if(inst.type == LW)
             {
+                postqueues[POSTMEM].push(ed);
                 inst.cycle = cycle;
-                //buffers[POSTMEM].clear();
                 buffers[POSTMEM].push_back(inst);
-                //quecycle[POSTMEM] = cycle;
             }
             else
             {
-                result[inst.rd] = NIL;
+                //result[inst.rd] = NIL;
             }
         }
     }
@@ -430,31 +495,40 @@ void SbInstSim::Exec_st()
 
 void SbInstSim::WB_st()
 {
-    if(buffers[POSTALU].size()>0)
+    if(postqueues[POSTALU].size()>0)
     {
+        ExecData data = postqueues[POSTALU].front();
         Inst inst = buffers[POSTALU].front();
         if(inst.cycle<cycle)
         {
+            r[data.rd] = data.data;
+            postqueues[POSTALU].pop();
             buffers[POSTALU].erase(buffers[POSTALU].begin());
-            result[inst.rd] = NIL;
+            result[data.rd] = NIL;
         }
     }
-    else if(buffers[POSTALUB].size()>0)
+    else if(postqueues[POSTALUB].size()>0)
     {
+        ExecData data = postqueues[POSTALUB].front();
         Inst inst = buffers[POSTALUB].front();
         if(inst.cycle<cycle)
         {
+            r[data.rd] = data.data;
+            postqueues[POSTALUB].pop();
             buffers[POSTALUB].erase(buffers[POSTALUB].begin());
-            result[inst.rd] = NIL;
+            result[data.rd] = NIL;
         }
     }
-    else if(buffers[POSTMEM].size()>0)
+    else if(postqueues[POSTMEM].size()>0)
     {
+        ExecData data = postqueues[POSTMEM].front();
         Inst inst = buffers[POSTMEM].front();
         if(inst.cycle < cycle)
         {
+            r[data.rd] = data.data;
+            postqueues[POSTMEM].pop();
             buffers[POSTMEM].erase(buffers[POSTMEM].begin());
-            result[inst.rd] = NIL;
+            result[data.rd] = NIL;
         }
     }
 }
@@ -470,7 +544,7 @@ void SbInstSim::Run(InstDecoder &instdec)
     while(true)
     {
         int tmp=0;
-        if(cycle==3)
+        if(cycle==16)
             tmp=0;
             
         if(ifstate==4)
@@ -491,7 +565,7 @@ void SbInstSim::Run(InstDecoder &instdec)
         //---------------------------------------------------------
 #ifdef TEST
         OStream(std::cout, cycle, *this);
-        //std::cout << "--------------------------" << std::endl;
+        
         if(cycle > 100)
             break;
 #endif
@@ -508,12 +582,12 @@ void SStream(std::stringstream &outs, int cycle, SbInstSim &sim)
     outs << "IF Unit:\n";
     outs << "\tWaiting Instruction:";
     if(sim.ifstate==1)
-        outs<<  GetCodeDisplaySb('[', sim.buffers[IFUNIT][0], ']');
+        outs<<  GetCodeDisplaySb("[", sim.buffers[IFUNIT][0], "]");
     outs << std::endl;
         
     outs << "\tExecuted Instruction:";
     if(sim.ifstate==2)
-        outs<< GetCodeDisplaySb('[', sim.buffers[IFUNIT][0], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[IFUNIT][0], "]");
     outs << std::endl;
     
     outs << "Pre-Issue Buffer:\n";
@@ -568,84 +642,84 @@ void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
     outs << "Cycle:"<< cycle << "\n\n";
     
     outs << "IF Unit:\n";
-    outs << "\tWaiting Instruction:";
+    outs << "\tWaiting Instruction: ";
     if(sim.ifstate==1)
-        outs<<  GetCodeDisplaySb('[', sim.buffers[IFUNIT][0], ']');
+        outs<<  GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
     outs << std::endl;
     
-    outs << "\tExecuted Instruction:";
+    outs << "\tExecuted Instruction: ";
     if(sim.ifstate==2)
-        outs<< GetCodeDisplaySb('[', sim.buffers[IFUNIT][0], ']');
+        outs<< GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
     outs << std::endl;
     
     outs << "Pre-Issue Buffer:\n";
     outs << "\tEntry 0:";
     if(sim.buffers[PREISSUE].size()>0)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREISSUE][0], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][0], "]");
     outs << std::endl;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREISSUE].size()>1)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREISSUE][1], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][1], "]");
     outs << std::endl;
     
     outs << "\tEntry 2:";
     if(sim.buffers[PREISSUE].size()>2)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREISSUE][2], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][2], "]");
     outs << std::endl;
     
     outs << "\tEntry 3:";
     if(sim.buffers[PREISSUE].size()>3)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREISSUE][3], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][3], "]");
     outs << std::endl;
     
     
     outs << "Pre-ALU Queue:" << std::endl;
     outs << "\tEntry 0:";
     if(sim.buffers[PREALU].size()>0)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREALU][0], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREALU][0], "]");
     outs << std::endl;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREALU].size()>1)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREALU][1], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREALU][1], "]");
     outs << std::endl;
     
     outs << "Post-ALU Buffer:";
     if(sim.buffers[POSTALU].size()>0)
-        outs<< GetCodeDisplaySb('[', sim.buffers[POSTALU][0], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[POSTALU][0], "]");
     outs << std::endl;
     
     outs << "Pre-ALUB Queue:" << std::endl;
     outs << "\tEntry 0:";
     if(sim.buffers[PREALUB].size()>0)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREALUB][0], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREALUB][0], "]");
     outs << std::endl;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREALUB].size()>1)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREALUB][1], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREALUB][1], "]");
     outs << std::endl;
     
     outs << "Post-ALUB Buffer:";
     if(sim.buffers[POSTALUB].size()>0)
-        outs<< GetCodeDisplaySb('[', sim.buffers[POSTALUB][0], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[POSTALUB][0], "]");
     outs << std::endl;
     
     outs << "Pre-MEM Queue:" << std::endl;
     outs << "\tEntry 0:";
     if(sim.buffers[PREMEM].size()>0)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREMEM][0], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREMEM][0], "]");
     outs << std::endl;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREMEM].size()>1)
-        outs<< GetCodeDisplaySb('[', sim.buffers[PREMEM][1], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[PREMEM][1], "]");
     outs << std::endl;
     
     outs << "Post-MEM Buffer:";
     if(sim.buffers[POSTMEM].size()>0)
-        outs<< GetCodeDisplaySb('[', sim.buffers[POSTMEM][0], ']');
+        outs<< GetCodeDisplaySb("[", sim.buffers[POSTMEM][0], "]");
     outs << std::endl;
     
     outs << "\nRegisters\n";

@@ -96,12 +96,18 @@ enum buffertype
     IFUNIT      = 0,
     PREISSUE    = 1,
     PREALU      = 2,
-    POSTALU     = 3,
+    //POSTALU     = 3,
     PREALUB     = 4,
-    POSTALUB    = 5,
+    //POSTALUB    = 5,
     PREMEM      = 6,
-    POSTMEM     = 7,
+    //POSTMEM     = 7,
     EXEC        = 8
+};
+enum quetype
+{
+    POSTALU     = 0,
+    POSTALUB    = 1,
+    POSTMEM     = 2,
 };
 //--------------------------------------------------------------------------
 class Inst
@@ -162,6 +168,25 @@ public:
     unsigned int address;
     char code[32+2];
     bool busy;//?
+};
+//--------------------------------------------------------------------------
+class ExecData
+{
+public:
+    ExecData():rd(0),data(0),cycle(0)
+    {}
+    
+    ExecData(short _rd, int _data, int _cycle)
+    {
+        rd      = _rd;
+        data    = _data;
+        cycle   = _cycle;
+    }
+    
+    int data;
+    int cycle;
+    short rd;
+
 };
 //--------------------------------------------------------------------------
 #endif
