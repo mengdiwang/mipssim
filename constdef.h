@@ -22,7 +22,7 @@ const std::string typestr[28] = {"J", "JR", "BEQ", "BLTZ", "BGTZ", "BREAK", "SW"
 //--------------------------------------------------------------------------
 enum insttype
 {
-    NIL		= 1024,
+    NIL		= -1,
     J		= 0,
     JR		= 1,
     BEQ		= 2,
@@ -100,20 +100,13 @@ enum buffertype
     PREALUB     = 4,
     POSTALUB    = 5,
     PREMEM      = 6,
-    POSTMEM     = 7,
-    EXEC        = 8
-};
-enum quetype
-{
-    QPOSTALU     = 0,
-    QPOSTALUB    = 1,
-    QPOSTMEM     = 2,
+    POSTMEM     = 7
 };
 //--------------------------------------------------------------------------
 class Inst
 {
 public:
-    Inst():address(0),other(0),rs(1024),rt(1024),rd(1024),sa(0),cycle(0)
+    Inst():address(0),other(0),rs(0),rt(0),rd(0),sa(0),state(0)
     {
         memset(code, 0, sizeof(code));
     }
@@ -123,7 +116,6 @@ public:
     unsigned int address;
     int other;
     insttype type;
-    int cycle;
     unsigned short rs;
     unsigned short rt;
     unsigned short rd;
@@ -134,7 +126,7 @@ public:
 class InstBuffer
 {
 public:
-    InstBuffer():cur(0),max(4),cycle(0)
+    InstBuffer():cur(0),max(4)
     {
         //memset(state, 0, sizeof(state));
     }
@@ -143,14 +135,12 @@ public:
     {
         cur = 0;
         max = _max;
-        cycle = 0;
         //memset(state, 0, sizeof(state));
     }
     
 public:
     int cur;
     int max;
-    int cycle;
     //int state[4];
     std::deque<Inst> buffer;
 
@@ -168,23 +158,6 @@ public:
     unsigned int address;
     char code[32+2];
     bool busy;//?
-};
-//--------------------------------------------------------------------------
-class ExecData
-{
-public:
-    ExecData():rd(0),data(0)
-    {}
-    
-    ExecData(short _rd, int _data)
-    {
-        rd      = _rd;
-        data    = _data;
-    }
-    
-    int data;
-    short rd;
-
 };
 //--------------------------------------------------------------------------
 #endif
