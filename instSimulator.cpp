@@ -22,93 +22,6 @@ inline int GetInstIndex(int address)
     return (address - ADDBASE) >> IMMOFFSET;
 }
 
-bool InstSim::CodeExec(Inst i, int &codeidx, bool &jump)
-{
-    bool isBreak = false;
-    switch (i.type)
-    {
-        case insttype(J)://J
-            jump = true;
-            codeidx = GetInstIndex(i.other);
-            break;
-        case insttype(JR)://JR
-            jump = true;
-            codeidx = GetInstIndex(r[i.rs]);
-            break;
-        case insttype(BEQ)://BEQ
-        {
-            if(r[i.rs] == r[i.rt])
-                codeidx += i.other >> 2;
-        }
-            break;
-        case insttype(BLTZ)://BLTZ
-        {
-            if(r[i.rs] < 0)
-                codeidx += i.other >> 2;
-        }
-            break;
-        case insttype(BGTZ)://BGTZ
-        {
-            if(r[i.rs] > 0)
-                codeidx  += i.other >> 2;
-        }
-            break;
-        case insttype(BREAK)://BREAK
-            isBreak = true;
-            break;
-        case insttype(SW)://SW
-            SetMembyAddr(r[i.rs] + i.other, r[i.rd]); break;
-        case insttype(LW)://LW rt <- memory[r[base] + offset]
-        {
-            int data = 0;
-            if(GetMembyAddr(r[i.rs] + i.other, data))
-                r[i.rd] = data;
-        }
-            break;
-        case insttype(SLL)://SLL
-            r[i.rd] = r[i.rt] << i.sa; break;
-        case insttype(SRL)://SRL
-            r[i.rd] = (signed)((unsigned)r[i.rt] >> i.sa); break; //Logic right shift does not remain sign bit
-        case insttype(SRA)://SRA
-            r[i.rd] = r[i.rt] >> i.sa; break;
-        case insttype(NOP)://NOP
-            break;
-        case insttype(ADD)://ADD
-            r[i.rd] = r[i.rs] + r[i.rt]; break;
-        case insttype(SUB)://SUB
-            r[i.rd] = r[i.rs] - r[i.rt]; break;
-        case insttype(MUL)://MUL
-            r[i.rd] = r[i.rs] * r[i.rt]; break;
-        case insttype(AND)://AND
-            r[i.rd] = r[i.rs] & r[i.rt]; break;
-        case insttype(OR)://OR
-            r[i.rd] = r[i.rs] | r[i.rt]; break;
-        case insttype(XOR)://XOR
-            r[i.rd] = r[i.rs] ^ r[i.rt]; break;
-        case insttype(NOR)://NOR
-            r[i.rd] = (signed)(~((unsigned)r[i.rs] | (unsigned)r[i.rt])); break;
-        case insttype(SLT)://SLT
-            r[i.rd] = (r[i.rs] < r[i.rt])?1:0; break;
-        case insttype(ADDI)://ADDI
-            r[i.rd] = r[i.rs] + i.other; break;
-        case insttype(ANDI)://ANDI
-            r[i.rd] = r[i.rs] & i.other; break;
-        case insttype(SUBI)://SUBI
-            r[i.rd] = r[i.rs] - i.other; break;
-        case insttype(MULI)://MULI
-            r[i.rd] = r[i.rs] * i.other; break;
-        case insttype(NORI)://NORI
-            r[i.rd] = (signed)(~((unsigned)r[i.rs] | (unsigned)i.other)); break;
-        case insttype(SLTI)://SLTI
-            r[i.rd] = (r[i.rs] < i.other)?1:0; break;
-        default:
-            break;
-    }
-
-    return isBreak;
-}
-
-
 int InstSim::Run(InstDecoder &instdec)
 {
     int ret = 0;
@@ -127,8 +40,85 @@ int InstSim::Run(InstDecoder &instdec)
         bool jump = false;
         
         Inst i= instdec.GetInsts()[codeidx];
-        
-        isBreak = CodeExec(i, codeidx, jump);
+        switch (i.type)
+        {
+            case insttype(J)://J
+                jump = true;
+                codeidx = GetInstIndex(i.other);
+                break;
+            case insttype(JR)://JR
+                jump = true;
+                codeidx = GetInstIndex(r[i.rs]);
+                break;
+            case insttype(BEQ)://BEQ
+            {
+                if(r[i.rs] == r[i.rt])
+                    codeidx += i.other >> 2;
+            }
+                break;
+            case insttype(BLTZ)://BLTZ
+            {
+                if(r[i.rs] < 0)
+                    codeidx += i.other >> 2;
+            }
+                break;
+            case insttype(BGTZ)://BGTZ
+            {
+                if(r[i.rs] > 0)
+                    codeidx  += i.other >> 2;
+            }
+                break;
+            case insttype(BREAK)://BREAK
+                isBreak = true;
+                break;
+            case insttype(SW)://SW
+                SetMembyAddr(r[i.rs] + i.other, r[i.rt]); break;
+            case insttype(LW)://LW rt <- memory[r[base] + offset]
+            {
+                int data = 0;
+                if(GetMembyAddr(r[i.rs] + i.other, data))
+                    r[i.rt] = data;
+            }
+                break;
+            case insttype(SLL)://SLL
+                r[i.rd] = r[i.rt] << i.sa; break;
+            case insttype(SRL)://SRL
+                r[i.rd] = (signed)((unsigned)r[i.rt] >> i.sa); break; //Logic right shift does not remain sign bit
+            case insttype(SRA)://SRA
+                r[i.rd] = r[i.rt] >> i.sa; break;
+            case insttype(NOP)://NOP
+                break;
+            case insttype(ADD)://ADD
+                r[i.rd] = r[i.rs] + r[i.rt]; break;
+            case insttype(SUB)://SUB
+                r[i.rd] = r[i.rs] - r[i.rt]; break;
+            case insttype(MUL)://MUL
+                r[i.rd] = r[i.rs] * r[i.rt]; break;
+            case insttype(AND)://AND
+                r[i.rd] = r[i.rs] & r[i.rt]; break;
+            case insttype(OR)://OR
+                r[i.rd] = r[i.rs] | r[i.rt]; break;
+            case insttype(XOR)://XOR
+                r[i.rd] = r[i.rs] ^ r[i.rt]; break;
+            case insttype(NOR)://NOR
+                r[i.rd] = (signed)(~((unsigned)r[i.rs] | (unsigned)r[i.rt])); break;
+            case insttype(SLT)://SLT
+                r[i.rd] = (r[i.rs] < r[i.rs])?1:0; break;
+            case insttype(ADDI)://ADDI
+                r[i.rt] = r[i.rs] + i.other; break;
+            case insttype(ANDI)://ANDI
+                r[i.rt] = r[i.rs] & i.other; break;
+            case insttype(SUBI)://SUBI
+                r[i.rt] = r[i.rs] - i.other; break;
+            case insttype(MULI)://MULI
+                r[i.rt] = r[i.rs] * i.other; break;
+            case insttype(NORI)://NORI
+                r[i.rt] = (signed)(~((unsigned)r[i.rs] | (unsigned)i.other)); break;
+            case insttype(SLTI)://SLTI
+                r[i.rt] = (r[i.rs] < i.other)?1:0; break;
+            default:
+                break;
+        }
         
         //---------------------------------------------------------
         //step output
