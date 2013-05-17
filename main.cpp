@@ -29,12 +29,10 @@ int main(int argc, const char * argv[])
     InstDecoder decoder;
 
     decoder.Decode(argv[1]);
-	
+	decoder.Output("disassembly.txt");
+    
     SbInstSim sbSim;
     sbSim.Run(decoder);
-    
-    
-    //decoder.Output("disassembly.txt");
     
     //InstSim simulator;
     //simulator.Run(decoder);
