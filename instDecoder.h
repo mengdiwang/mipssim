@@ -45,6 +45,7 @@ private:
 };
 //--------------------------------------------------------------------------
 std::string GetCodeDisplay(char sip, Inst &inst);
+std::string GetCodeDisplaySb(char sip, Inst &inst, char sipl);
 std::string GetCodeType(Inst &inst);
 //--------------------------------------------------------------------------
 
