@@ -15,6 +15,7 @@
 #include <ostream>
 #include <vector>
 #include <queue>
+#include <sstream>
 
 class SbInstSim:public InstSim
 {
@@ -23,13 +24,11 @@ public:
     {
         for(int i=0; i<REGISTERNUM; i++)
             result[i] = NIL;
-        
-        memset(quecycle, 0, sizeof(quecycle));
     }
     
     void Run(InstDecoder &instdec);
     
-private:
+protected:
     bool IF_st(InstDecoder &instdec);
     void ISSUE_st();
     void Exec_st();
@@ -45,17 +44,39 @@ private:
     friend void OStream(std::ostream &outs, int cycle, SbInstSim &sim);
     friend void SStream(std::stringstream &outs, int cycle, SbInstSim &sim);
     
-private:
+protected:
     int pc;
     int cycle;
     std::vector<Inst> buffers[8];
     std::queue<ExecData> postqueues[3];
-    int quecycle[8];
+    //int quecycle[8];
     int result[REGISTERNUM];
     std::string waitstr;
     std::string execstr;
+    
+    
 };
+//
+//struct ScoreBoarding
+//{
+//    ScoreBoarding():op(NIL),fi(0),fj(0),fk(0),qj(0),qk(0),busy(false),rj(false),rk(false)
+//    {
+//    
+//    }
+//   
+//    insttype op;
+//    int fi;
+//    int fj;
+//    int fk;
+//    int qj;
+//    int qk;
+//    bool busy;
+//    bool rj;
+//    bool rk;
+//};
 
 std::string GetCodeDisplaySb(std::string sip, Inst &inst, std::string sipl);
+void OStream(std::ostream &outs, int cycle, SbInstSim &sim);
+void SStream(std::stringstream &outs, int cycle, SbInstSim &sim);
 
 #endif

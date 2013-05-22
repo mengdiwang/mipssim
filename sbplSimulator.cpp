@@ -6,7 +6,7 @@
 //  Copyright (c) 2013年 Mengdi Wang. All rights reserved.
 //
 
-//#define TEST
+//#define DEBUG
 
 #include "sbplSimulator.h"
 #include <sstream>
@@ -14,7 +14,7 @@
 #include <cmath>
 #include <iomanip>
 
-#ifdef TEST
+#ifdef DEBUG
 #include <assert.h>
 #include <iostream>
 #endif
@@ -196,9 +196,9 @@ bool SbInstSim::IF_st(InstDecoder &instdec)
                     execstr = "";
                     break;
             }
-            if(i==0 && !isbranch && preisqueue.size()<3)
+            if(i==0 && isbranch && preisqueue.size()<3)
             {
-                if(instdec.GetInsts()[pc+1].type==BREAK)
+                if(instdec.GetInsts()[pc].type==BREAK)
                     isbreak = true;
             }
         }
@@ -236,16 +236,6 @@ bool SbInstSim::ChkWAW(int rd, int pos)
     }
     
     //check issued but not finished instructions
-/*
-    std::vector<Inst> &execqueue = buffers[EXEC];
-    for(int i=0; i<execqueue.size(); i++)
-    {
-        if(execqueue[i].type!=NIL && execqueue[i].rd == rd)
-        {
-            return true;
-        }
-    }
-*/
     if(result[rd] != NIL)
         return true;
     
@@ -264,23 +254,11 @@ bool SbInstSim::ChkRAW(int rj, int rk, int pos)
         }
     }
  
-/*
-    std::vector<Inst> &execqueue = buffers[EXEC];
- 
-    for(int i=0; (i<pos) && (i<execqueue.size()); i++)
-    {
-        if((execqueue[i].type!=NIL && execqueue[i].rd==rj)||(execqueue[i].type!=NIL && execqueue[i].rd==rk))
-        {
-            return true;
-        }
-    }
-*/
     if((rj!=1024 && result[rj]!=NIL) || (rk!=1024 && result[rk]!=NIL))
         return true;
     
     return false;
 }
-
 
 bool SbInstSim::ChkNoSW(int pos)
 {
@@ -296,48 +274,64 @@ bool SbInstSim::ChkNoSW(int pos)
 
 bool SbInstSim::Chkhzd(Inst inst, int pos)
 {
-    bool WARhazard = false;
-    bool WAWhazard = false;
-    bool RAWhazard = false;
     bool canissued = false;
-    bool HasunisSW = false;
+    
+    bool WARhazard = false;//WAR with not issued
+    bool WAWhazard = false;//No WAW hazards with active instructions (issued but not finished, or earlier not-issued instructions);
+    bool RAWhazard = false;//for MEM instructions, all the source registers are ready at the end of the previous cycle.
+    bool HasunisSW = false;//The load instruction must wait until all the previous stores are issued. The stores must be issued in order.
+    
     std::vector<Inst> &preisqueue = buffers[PREISSUE];
     
     switch (inst.type) {
+        
+        //ALUB
         case SLL:
         case SRL:
         case SRA:
         case MUL:
-        case MULI://ALUB
+        case MULI:
             WARhazard = ChkWAR(inst.rd, pos);
             WAWhazard = ChkWAW(inst.rd, pos);
             RAWhazard = ChkRAW(inst.rs, inst.rt, pos);
             
-            if(!WAWhazard && !WAWhazard && !RAWhazard && buffers[PREALUB].size()<2 && inst.cycle<cycle)
+            if(!WAWhazard && !WAWhazard && !RAWhazard && buffers[PREALUB].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
             {
                 preisqueue[pos].type = NIL; //delete pos at pre-issue buffer
                 
                 inst.cycle = cycle;
                 buffers[PREALUB].push_back(inst);
-                //quecycle[PREALUB] = cycle;
                 canissued = true;
             }
             
             break;
             
+        //MEM
         case LW://LW
-        case SW://MEM ????
             HasunisSW = ChkNoSW(pos);
             WARhazard = ChkWAR(inst.rd, pos);
             WAWhazard = ChkWAW(inst.rd, pos);
-            RAWhazard = ChkRAW(inst.rs, inst.rt, pos);
-            if(!WAWhazard && !WAWhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)
+            RAWhazard = ChkRAW(inst.rs, inst.rd, pos);//for MEM instructions, all the source registers are ready at the end of the previous cycle.
+            if(!WAWhazard && !WAWhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
             {
                 preisqueue[pos].type = NIL; //delete pos at pre-issue buffer
                 
                 inst.cycle = cycle;
                 buffers[PREMEM].push_back(inst);
-                //quecycle[PREMEM] = cycle;
+                canissued = true;
+            }
+            break;
+        case SW://sw memory[base+offset] <- rt, rt read
+            HasunisSW = ChkNoSW(pos);
+            //WARhazard = ChkWAR(inst.rd, pos);
+            //WAWhazard = ChkWAW(inst.rd, pos);
+            RAWhazard = ChkRAW(inst.rs, inst.rd, pos);//for MEM instructions, all the source registers are ready at the end of the previous cycle.
+            if(!WAWhazard && !WAWhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
+            {
+                preisqueue[pos].type = NIL; //delete pos at pre-issue buffer
+                
+                inst.cycle = cycle;
+                buffers[PREMEM].push_back(inst);
                 canissued = true;
             }
             break;
@@ -349,7 +343,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
         case BGTZ:
         case NOP:
         case BREAK://WRONG
-#ifdef TEST
+#ifdef DEBUG
             assert(0);
 #endif
             break;
@@ -365,7 +359,6 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
                 
                 inst.cycle = cycle;
                 buffers[PREALU].push_back(inst);
-                //quecycle[PREALU] = cycle;
                 canissued = true;
             }
             
@@ -374,8 +367,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
     
     if(canissued)
     {
-        //buffers[EXEC].push_back(inst);
-        if(inst.type!=SW)
+        if(inst.type!=SW) //SW does NOT write any thing to the register
             result[inst.rd] = inst.type;
     }
     
@@ -408,13 +400,10 @@ void SbInstSim::ISSUE_st()
     {
         preisqueue.push_back(tmp[i]);
     }
-    //std::remove_if(preisqueue.begin(), preisqueue.end(), );
 }
 
 void SbInstSim::Exec_st()
 {
-    //int codeidx = 0;
-    //bool jump = 0;
     if(buffers[PREALU].size()>0)
     {
         Inst inst = buffers[PREALU].front();
@@ -422,8 +411,6 @@ void SbInstSim::Exec_st()
         {
             buffers[PREALU].erase(buffers[PREALU].begin());
         
-            //CodeExec(inst, codeidx, jump);
-            
             int val;
             PLCodeExec(inst, val);
             
@@ -440,8 +427,6 @@ void SbInstSim::Exec_st()
         if(inst.cycle+1 < cycle)
         {
             buffers[PREALUB].erase(buffers[PREALUB].begin());
-        
-            //CodeExec(inst, codeidx, jump);
         
             int val;
             PLCodeExec(inst, val);
@@ -471,7 +456,7 @@ void SbInstSim::Exec_st()
             }
             else
             {
-                //result[inst.rd] = NIL;
+                //SW does NOTHING to the registers
             }
         }
     }
@@ -529,12 +514,6 @@ void SbInstSim::Run(InstDecoder &instdec)
     
     while(true)
     {
-        int tmp=0;
-        
-
-        if(cycle==26)
-            tmp=0;
-            
         if(isbreak)
             break;
         
@@ -551,7 +530,7 @@ void SbInstSim::Run(InstDecoder &instdec)
         //---------------------------------------------------------
         SStream(stepoutput, cycle, *this);
         //---------------------------------------------------------
-#ifdef TEST
+#ifdef DEBUG
         OStream(std::cout, cycle, *this);
         
         if(cycle > 1000)
@@ -662,7 +641,7 @@ void SStream(std::stringstream &outs, int cycle, SbInstSim &sim)
         outs << "R"<< std::setfill('0') << std::setw(2) << p <<":\t";
         for(int h=0; h<REGISTERNUM>>2; h++)
         {
-            outs << sim.r[p++] << ((h==((REGISTERNUM>>2)-1))?'\n':'\t');
+            outs << sim.r[p++] << ((h==((REGISTERNUM>>2)-1))?CR:"\t");
         }
     }
     
@@ -783,7 +762,7 @@ void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
         outs << "R"<< std::setfill('0') << std::setw(2) << p <<":\t";
         for(int h=0; h<REGISTERNUM>>2; h++)
         {
-            outs << sim.r[p++] << ((h==((REGISTERNUM>>2)-1))?'\n':'\t');
+            outs << sim.r[p++] << ((h==((REGISTERNUM>>2)-1))?CR:"\t");
         }
     }
     
