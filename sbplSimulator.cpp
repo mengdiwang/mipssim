@@ -136,6 +136,7 @@ bool SbInstSim::PLCodeExec(Inst i, int &val)
         default:
             break;
     }
+    return true;
 }
 
 bool SbInstSim::IF_st(InstDecoder &instdec)
@@ -161,7 +162,7 @@ bool SbInstSim::IF_st(InstDecoder &instdec)
                 case BGTZ:
                 case J:
                     isbranch = true;
-                    if(ChkRAW(inst.rs, inst.rt, preisqueue.size()))
+                    if(ChkRAW(inst.rs, inst.rt, (int)preisqueue.size()))
                     {
                         waitstr = GetCodeDisplaySb("", inst, "");
                         execstr = "";
@@ -254,7 +255,6 @@ bool SbInstSim::ChkWAW(int rd, int pos)
 bool SbInstSim::ChkRAW(int rj, int rk, int pos)
 {
     std::vector<Inst> &preisqueue = buffers[PREISSUE];
-    std::vector<Inst> &execqueue = buffers[EXEC];
     
     for(int i=0; (i<pos) && (i<preisqueue.size()); i++)
     {
@@ -265,6 +265,8 @@ bool SbInstSim::ChkRAW(int rj, int rk, int pos)
     }
  
 /*
+    std::vector<Inst> &execqueue = buffers[EXEC];
+ 
     for(int i=0; (i<pos) && (i<execqueue.size()); i++)
     {
         if((execqueue[i].type!=NIL && execqueue[i].rd==rj)||(execqueue[i].type!=NIL && execqueue[i].rd==rk))
@@ -411,8 +413,8 @@ void SbInstSim::ISSUE_st()
 
 void SbInstSim::Exec_st()
 {
-    int codeidx = 0;
-    bool jump = 0;
+    //int codeidx = 0;
+    //bool jump = 0;
     if(buffers[PREALU].size()>0)
     {
         Inst inst = buffers[PREALU].front();
@@ -519,8 +521,8 @@ void SbInstSim::WB_st()
 void SbInstSim::Run(InstDecoder &instdec)
 {
     bool isbreak = false;
-    int ret = 0;
-    int codeidx = 0;
+    //int ret = 0;
+    //int codeidx = 0;
     std::stringstream stepoutput;
     
     SetMem(instdec.GetDatas());
