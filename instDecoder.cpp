@@ -69,7 +69,7 @@ Inst &DecBGTZ(std::string inststr, Inst &inst)//signed 16bit << IMOFFSET
 Inst &DecSW(std::string inststr, Inst &inst)//signed 16bit
 {
     inst.rs = GetInstIDB(6, 10, inststr);
-    inst.rt = GetInstIDB(11, 15, inststr);
+    inst.rd = GetInstIDB(11, 15, inststr);
     unsigned short tmp = GetInstIDB(16, INSTLENGTH-1, inststr);
     signed short t = (signed)tmp;
     inst.other = ((signed int)t);
@@ -79,7 +79,7 @@ Inst &DecSW(std::string inststr, Inst &inst)//signed 16bit
 Inst &DecLW(std::string inststr, Inst &inst)//signed 16bit
 {
     inst.rs = GetInstIDB(6, 10, inststr);
-    inst.rt = GetInstIDB(11, 15, inststr);
+    inst.rd = GetInstIDB(11, 15, inststr);
     unsigned short tmp = GetInstIDB(16, INSTLENGTH-1, inststr);
     signed short t = (signed)tmp;
     inst.other = ((signed int)t);
@@ -162,7 +162,7 @@ Inst &DecSLT(std::string inststr, Inst &inst)
 Inst &DecSpecialAI(std::string inststr, Inst &inst)//signed 16bit
 {
     inst.rs = GetInstIDB(6, 10, inststr);
-    inst.rt = GetInstIDB(11, 15, inststr);
+    inst.rd = GetInstIDB(11, 15, inststr);
     unsigned short tmp = GetInstIDB(16, INSTLENGTH-1, inststr);
     signed short t = (signed)tmp;
     inst.other = ((signed int)t);
@@ -199,61 +199,6 @@ Inst &DecSLTI(std::string inststr, Inst &inst)
     return DecSpecialAI(inststr, inst);
 }
 
-std::string GetCodeDisplaySb(char sip, Inst &inst, char sipl)
-{
-    char tmp[100] = {0};
-    std::stringstream ss;
-    switch(inst.type)
-    {
-        case insttype(J)://J
-            sprintf(tmp, "%c#%u%c", sip, inst.other, sipl);
-            break;
-        case insttype(JR)://JR
-            sprintf(tmp, "%cR%u%c", sip, inst.rs, sipl);
-            break;
-        case insttype(BEQ)://BEQ
-            sprintf(tmp, "%cR%u, R%u, #%d%c", sip, inst.rs, inst.rt, inst.other, sipl);
-            break;
-        case insttype(BLTZ)://BLTZ
-        case insttype(BGTZ)://BGTZ
-            sprintf(tmp, "%cR%u, #%d%c", sip, inst.rs, inst.other, sipl);
-            break;
-        case insttype(SW)://SW
-        case insttype(LW)://LW
-            sprintf(tmp, "%cR%u, %d(R%u)%c", sip, inst.rt, inst.other, inst.rs, sipl);
-            break;
-        case insttype(SLL)://SLL
-        case insttype(SRL)://SRL
-        case insttype(SRA)://SRA
-            sprintf(tmp, "%cR%u, R%u, #%u%c", sip, inst.rd, inst.rt, inst.sa, sipl);
-            break;
-        case insttype(ADD)://ADD
-        case insttype(SUB)://SUB
-        case insttype(MUL)://MUL
-        case insttype(AND)://AND
-        case insttype(OR)://OR
-        case insttype(XOR)://XOR
-        case insttype(NOR)://NOR
-        case insttype(SLT)://SLT
-            sprintf(tmp, "%cR%u, R%u, R%u%c", sip, inst.rd, inst.rs, inst.rt, sipl);
-            break;
-        case insttype(ADDI)://ADDI
-        case insttype(ANDI)://ANDI
-        case insttype(SUBI)://SUBI
-        case insttype(MULI)://MULI
-        case insttype(NORI)://NORI
-        case insttype(SLTI)://SLTI
-            sprintf(tmp, "%cR%u, R%u, #%d%c", sip, inst.rt, inst.rs, inst.other, sipl);
-            break;
-        default:
-            break;
-    }
-    
-	ss<<tmp;
-	
-    return ss.str();
-}
-
 std::string GetCodeDisplay(char sip, Inst &inst)
 {
     char tmp[100] = {0};
@@ -275,7 +220,7 @@ std::string GetCodeDisplay(char sip, Inst &inst)
             break;
         case insttype(SW)://SW
         case insttype(LW)://LW
-            sprintf(tmp, "%cR%u, %d(R%u)", sip, inst.rt, inst.other, inst.rs);
+            sprintf(tmp, "%cR%u, %d(R%u)", sip, inst.rd, inst.other, inst.rs);
             break;
         case insttype(SLL)://SLL
         case insttype(SRL)://SRL
@@ -298,7 +243,7 @@ std::string GetCodeDisplay(char sip, Inst &inst)
         case insttype(MULI)://MULI
         case insttype(NORI)://NORI
         case insttype(SLTI)://SLTI
-            sprintf(tmp, "%cR%u, R%u, #%d", sip, inst.rt, inst.rs, inst.other);
+            sprintf(tmp, "%cR%u, R%u, #%d", sip, inst.rd, inst.rs, inst.other);
             break;
         default:
             break;

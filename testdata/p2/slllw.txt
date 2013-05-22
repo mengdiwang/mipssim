@@ -1,0 +1,3 @@
+SLL R10, R1, #2 
+LW R3, 172(R10)
+BREAK

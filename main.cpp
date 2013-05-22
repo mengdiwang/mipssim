@@ -17,9 +17,9 @@
 
 int main(int argc, const char * argv[])
 {
-	if(argc < 2)
+	if(argc < 3)
 	{
-		printf("Usage: MIPSsim <input>\n");
+		printf("Usage: MIPSsim <input> <output>\n");
 		return 1;
 	}
 	
@@ -29,13 +29,11 @@ int main(int argc, const char * argv[])
     InstDecoder decoder;
 
     decoder.Decode(argv[1]);
-	
+	decoder.Output("disassembly.txt");
+    
     SbInstSim sbSim;
     sbSim.Run(decoder);
-    
-    
-    //decoder.Output("disassembly.txt");
-    
+    sbSim.Output(argv[2]);
     //InstSim simulator;
     //simulator.Run(decoder);
     
