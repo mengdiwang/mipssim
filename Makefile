@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-c -Wall
 LDFLAGS=
-SOURCES=main.cpp instDecoder.cpp instSimulator.cpp
+SOURCES=main.cpp instDecoder.cpp instSimulator.cpp sbplSimulator.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=MIPSsim
 

@@ -28,7 +28,8 @@ protected:
     void SetMem(const std::vector<Data> &mm)
     {
         mem = mm;
-        MemBase = mem[0].address;
+        if(mm.size()>0)
+            MemBase = mem[0].address;
     }
     
     int SetMembyAddr(int address, int data)
