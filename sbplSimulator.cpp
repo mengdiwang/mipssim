@@ -19,6 +19,8 @@
 #include <iostream>
 #endif
 
+const std::string CR="\r\n";
+const std::string LR="\n";
 void OStream(std::ostream &outs, int cycle, SbInstSim &sim);
 void SStream(std::stringstream &outs, int cycle, SbInstSim &sim);
 
@@ -561,95 +563,96 @@ void SbInstSim::Run(InstDecoder &instdec)
 
 void SStream(std::stringstream &outs, int cycle, SbInstSim &sim)
 {
-    outs << "--------------------\n";
-    outs << "Cycle:"<< cycle << "\n\n";
+    outs << "--------------------" << CR;
+    outs << "Cycle:"<< cycle << CR << CR;
     
-    outs << "IF Unit:\n";
+    outs << "IF Unit:" << CR;
     outs << "\tWaiting Instruction: ";
     //if(sim.ifstate==1)
     //    outs<<  GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
     //if(sim.waitstr!="")
     outs << sim.waitstr;
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tExecuted Instruction: ";
     //if(sim.ifstate==2)
     //    outs<< GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
     //if(sim.execstr!="")
     outs << sim.execstr;
-    outs << std::endl;
+    outs << CR;
     
-    outs << "Pre-Issue Buffer:\n";
+    outs << "Pre-Issue Buffer:" << CR;
     outs << "\tEntry 0:";
     if(sim.buffers[PREISSUE].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][0], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREISSUE].size()>1)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][1], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 2:";
     if(sim.buffers[PREISSUE].size()>2)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][2], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 3:";
     if(sim.buffers[PREISSUE].size()>3)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][3], "]");
-    outs << std::endl;
+    outs << CR;
     
     
-    outs << "Pre-ALU Queue:" << std::endl;
+    outs << "Pre-ALU Queue:" << CR;
     outs << "\tEntry 0:";
     if(sim.buffers[PREALU].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREALU][0], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREALU].size()>1)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREALU][1], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "Post-ALU Buffer:";
     if(sim.buffers[POSTALU].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[POSTALU][0], "]");
-    outs << std::endl;
+    outs << CR;
     
-    outs << "Pre-ALUB Queue:" << std::endl;
+    outs << "Pre-ALUB Queue:" << CR;
     outs << "\tEntry 0:";
     if(sim.buffers[PREALUB].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREALUB][0], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREALUB].size()>1)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREALUB][1], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "Post-ALUB Buffer:";
     if(sim.buffers[POSTALUB].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[POSTALUB][0], "]");
-    outs << std::endl;
+    outs << CR;
     
-    outs << "Pre-MEM Queue:" << std::endl;
+    outs << "Pre-MEM Queue:" << CR;
     outs << "\tEntry 0:";
     if(sim.buffers[PREMEM].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREMEM][0], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREMEM].size()>1)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREMEM][1], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "Post-MEM Buffer:";
     if(sim.buffers[POSTMEM].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[POSTMEM][0], "]");
-    outs << std::endl;
+    outs << CR;
     
-    outs << "\nRegisters\n";
+    outs << CR;
+    outs << "Registers" << CR;
     
     int p = 0;
     for(int j=0; j<4; j++)
@@ -661,7 +664,8 @@ void SStream(std::stringstream &outs, int cycle, SbInstSim &sim)
         }
     }
     
-    outs << "\nData\n";
+    outs << CR;
+    outs << "Data" << CR;
     
     int memsize = std::ceil((sim.mem.size() + 0.0) / 8);
     for(int j=0; j<memsize; j++)
@@ -673,101 +677,103 @@ void SStream(std::stringstream &outs, int cycle, SbInstSim &sim)
             if(memidx < sim.mem.size())
                 outs <<'\t' << sim.mem[memidx].data;
         }
-        outs << '\n';
+        outs << CR;
     }
+    outs << std::flush;
 }
 
 void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
 {
-    outs << "--------------------\n";
-    outs << "Cycle:"<< cycle << "\n\n";
+    outs << "--------------------" << CR;
+    outs << "Cycle:"<< cycle << CR << CR;
     
-    outs << "IF Unit:\n";
+    outs << "IF Unit:" << CR;
     outs << "\tWaiting Instruction: ";
     //if(sim.ifstate==1)
     //    outs<<  GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
     //if(sim.waitstr!="")
         outs << sim.waitstr;
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tExecuted Instruction: ";
     //if(sim.ifstate==2)
     //    outs<< GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
     //if(sim.execstr!="")
         outs << sim.execstr;
-    outs << std::endl;
+    outs << CR;
     
-    outs << "Pre-Issue Buffer:\n";
+    outs << "Pre-Issue Buffer:" << CR;
     outs << "\tEntry 0:";
     if(sim.buffers[PREISSUE].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][0], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREISSUE].size()>1)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][1], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 2:";
     if(sim.buffers[PREISSUE].size()>2)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][2], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 3:";
     if(sim.buffers[PREISSUE].size()>3)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREISSUE][3], "]");
-    outs << std::endl;
+    outs << CR;
     
     
-    outs << "Pre-ALU Queue:" << std::endl;
+    outs << "Pre-ALU Queue:" << CR;
     outs << "\tEntry 0:";
     if(sim.buffers[PREALU].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREALU][0], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREALU].size()>1)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREALU][1], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "Post-ALU Buffer:";
     if(sim.buffers[POSTALU].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[POSTALU][0], "]");
-    outs << std::endl;
+    outs << CR;
     
-    outs << "Pre-ALUB Queue:" << std::endl;
+    outs << "Pre-ALUB Queue:" << CR;
     outs << "\tEntry 0:";
     if(sim.buffers[PREALUB].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREALUB][0], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREALUB].size()>1)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREALUB][1], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "Post-ALUB Buffer:";
     if(sim.buffers[POSTALUB].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[POSTALUB][0], "]");
-    outs << std::endl;
+    outs << CR;
     
-    outs << "Pre-MEM Queue:" << std::endl;
+    outs << "Pre-MEM Queue:" << CR;
     outs << "\tEntry 0:";
     if(sim.buffers[PREMEM].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREMEM][0], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "\tEntry 1:";
     if(sim.buffers[PREMEM].size()>1)
         outs<< GetCodeDisplaySb("[", sim.buffers[PREMEM][1], "]");
-    outs << std::endl;
+    outs << CR;
     
     outs << "Post-MEM Buffer:";
     if(sim.buffers[POSTMEM].size()>0)
         outs<< GetCodeDisplaySb("[", sim.buffers[POSTMEM][0], "]");
-    outs << std::endl;
+    outs << CR;
     
-    outs << "\nRegisters\n";
+    outs << CR;
+    outs << "Registers" << CR;
     
     int p = 0;
     for(int j=0; j<4; j++)
@@ -779,7 +785,8 @@ void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
         }
     }
     
-    outs << "\nData\n";
+    outs << CR;
+    outs << "Data" << CR;
     
     int memsize = std::ceil((sim.mem.size() + 0.0) / 8);
     for(int j=0; j<memsize; j++)
@@ -791,6 +798,7 @@ void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
             if(memidx < sim.mem.size())
                 outs <<'\t' << sim.mem[memidx].data;
         }
-        outs << '\n';
+        outs << CR;
     }
+    outs << std::flush;
 }
