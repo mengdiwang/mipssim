@@ -151,6 +151,7 @@ bool SbInstSim::IF_st(InstDecoder &instdec)
     {
         Inst inst;
         //branch is fetched, the next instrcton is discarded immediately
+        int tmppc = pc;
         if(!isbranch && pc<instdec.GetInsts().size() && preisqueue.size()<4)
         {
             inst = instdec.GetInsts()[pc];
@@ -198,7 +199,7 @@ bool SbInstSim::IF_st(InstDecoder &instdec)
             }
             if(i==0 && isbranch && preisqueue.size()<3)
             {
-                if(instdec.GetInsts()[pc].type==BREAK)
+                if(instdec.GetInsts()[tmppc+1].type==BREAK)
                     isbreak = true;
             }
         }
@@ -518,6 +519,10 @@ void SbInstSim::Run(InstDecoder &instdec)
     
     while(true)
     {
+        int tmp = 0;
+        if(cycle == 16)
+            tmp = 0;
+        
         if(isbreak)
             break;
         
