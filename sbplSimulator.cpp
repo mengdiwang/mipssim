@@ -519,21 +519,19 @@ void SbInstSim::Run(InstDecoder &instdec)
     
     while(true)
     {
-        int tmp = 0;
-        if(cycle == 16)
-            tmp = 0;
-        
         if(isbreak)
             break;
         
         isbreak = IF_st(instdec);
         
-        ISSUE_st();
+        if(!isbreak)
+        {
+            ISSUE_st();
         
-        Exec_st();
+            Exec_st();
         
-        WB_st();
-
+            WB_st();
+        }
         //---------------------------------------------------------
         //step output
         //---------------------------------------------------------
