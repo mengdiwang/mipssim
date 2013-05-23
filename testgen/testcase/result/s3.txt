@@ -380,8 +380,8 @@ IF Unit:
 	Executed Instruction: BREAK
 Pre-Issue Buffer:
 	Entry 0:[SW	R12, 12(R2)]
-	Entry 1:[SW	R13, 16(R2)]
-	Entry 2:
+	Entry 1:[LW	R13, 16(R1)]
+	Entry 2:[SW	R13, 16(R2)]
 	Entry 3:
 Pre-ALU Queue:
 	Entry 0:
@@ -392,9 +392,9 @@ Pre-ALUB Queue:
 	Entry 1:
 Post-ALUB Buffer:
 Pre-MEM Queue:
-	Entry 0:[LW	R13, 16(R1)]
+	Entry 0:[LW	R12, 12(R1)]
 	Entry 1:
-Post-MEM Buffer:[LW	R12, 12(R1)]
+Post-MEM Buffer:
 
 Registers
 R00:	0	128	148	0	0	0	0	0

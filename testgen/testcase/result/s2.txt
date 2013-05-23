@@ -1642,9 +1642,9 @@ Pre-Issue Buffer:
 	Entry 2:[AND	R7, R6, #-1]
 	Entry 3:
 Pre-ALU Queue:
-	Entry 0:
+	Entry 0:[SLT	R7, R2, R3]
 	Entry 1:
-Post-ALU Buffer:[SLT	R7, R2, R3]
+Post-ALU Buffer:
 Pre-ALUB Queue:
 	Entry 0:
 	Entry 1:
