@@ -421,7 +421,8 @@ void SbInstSim::Exec_st()
         }
         
     }
-    else if(buffers[PREALUB].size()>0)
+    
+    if(buffers[PREALUB].size()>0)
     {
         Inst inst = buffers[PREALUB].front();
         if(inst.cycle+1 < cycle)
@@ -437,7 +438,8 @@ void SbInstSim::Exec_st()
             buffers[POSTALUB].push_back(inst);
         }
     }
-    else if(buffers[PREMEM].size()>0)
+    
+    if(buffers[PREMEM].size()>0)
     {
         Inst inst = buffers[PREMEM].front();
         if(inst.cycle < cycle)
@@ -477,7 +479,8 @@ void SbInstSim::WB_st()
             result[data.rd] = NIL;
         }
     }
-    else if(postqueues[QPOSTALUB].size()>0)
+    
+    if(postqueues[QPOSTALUB].size()>0)
     {
         ExecData data = postqueues[QPOSTALUB].front();
         Inst inst = buffers[POSTALUB].front();
@@ -489,7 +492,8 @@ void SbInstSim::WB_st()
             result[data.rd] = NIL;
         }
     }
-    else if(postqueues[QPOSTMEM].size()>0)
+    
+    if(postqueues[QPOSTMEM].size()>0)
     {
         ExecData data = postqueues[QPOSTMEM].front();
         Inst inst = buffers[POSTMEM].front();
