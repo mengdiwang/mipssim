@@ -313,7 +313,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
             WARhazard = ChkWAR(inst.rd, pos);
             WAWhazard = ChkWAW(inst.rd, pos);
             RAWhazard = ChkRAW(inst.rs, inst.rd, pos);//for MEM instructions, all the source registers are ready at the end of the previous cycle.
-            if(!WAWhazard && !WAWhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
+            if(!HasunisSW && !WAWhazard && !WAWhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
             {
                 preisqueue[pos].type = NIL; //delete pos at pre-issue buffer
                 
@@ -327,7 +327,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
             //WARhazard = ChkWAR(inst.rd, pos);
             //WAWhazard = ChkWAW(inst.rd, pos);
             RAWhazard = ChkRAW(inst.rs, inst.rd, pos);//for MEM instructions, all the source registers are ready at the end of the previous cycle.
-            if(!WAWhazard && !WAWhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
+            if(!HasunisSW && !WAWhazard && !WAWhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
             {
                 preisqueue[pos].type = NIL; //delete pos at pre-issue buffer
                 
