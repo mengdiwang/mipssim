@@ -148,7 +148,7 @@ bool SbInstSim::IF_st(InstDecoder &instdec)
     bool jump;
     bool stalled = false;;
     
-    for(int i=0; i<2; i++)
+    for(int i=0; i<2 && !isbreak; i++)
     {
         Inst inst;
         //branch is fetched, the next instrcton is discarded immediately
@@ -198,10 +198,15 @@ bool SbInstSim::IF_st(InstDecoder &instdec)
                     execstr = "";
                     break;
             }
-            if(i==0 && isbranch && preisqueue.size()<3)
+            if(isbranch
+               && i==0 && preisqueue.size()<3)//can be fetched as the second instruction
             {
                 if(instdec.GetInsts()[tmppc+1].type==BREAK)
+                {
                     isbreak = true;
+                    waitstr = "";
+                    execstr = "BREAK";
+                }
             }
         }
     }
@@ -244,6 +249,9 @@ bool SbInstSim::ChkWAW(int rd, int pos)
     return false;
 }
 
+//For MEM, all the source registers are ready
+//Acctually according to the sample.txt and simulation.txt
+//RAW IS CHECKED FOR EVERY KIND OF INSTRUCTIONS BEFORE ISSUE
 bool SbInstSim::ChkRAW(int rj, int rk, int pos)
 {
     std::vector<Inst> &preisqueue = buffers[PREISSUE];
@@ -262,6 +270,7 @@ bool SbInstSim::ChkRAW(int rj, int rk, int pos)
     return false;
 }
 
+//stores must be issued in order, load must waitt until all previous stores are issued
 bool SbInstSim::ChkNoSW(int pos)
 {
     std::vector<Inst> &preisqueue = buffers[PREISSUE];
@@ -297,7 +306,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
             WAWhazard = ChkWAW(inst.rd, pos);
             RAWhazard = ChkRAW(inst.rs, inst.rt, pos);
             
-            if(!WAWhazard && !WAWhazard && !RAWhazard && buffers[PREALUB].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
+            if(!WAWhazard && !WARhazard && !RAWhazard && buffers[PREALUB].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
             {
                 preisqueue[pos].type = NIL; //delete pos at pre-issue buffer
                 
@@ -314,7 +323,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
             WARhazard = ChkWAR(inst.rd, pos);
             WAWhazard = ChkWAW(inst.rd, pos);
             RAWhazard = ChkRAW(inst.rs, inst.rd, pos);//for MEM instructions, all the source registers are ready at the end of the previous cycle.
-            if(!HasunisSW && !WAWhazard && !WAWhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
+            if(!HasunisSW && !WAWhazard && !WARhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
             {
                 preisqueue[pos].type = NIL; //delete pos at pre-issue buffer
                 
@@ -328,7 +337,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
             //WARhazard = ChkWAR(inst.rd, pos);
             //WAWhazard = ChkWAW(inst.rd, pos);
             RAWhazard = ChkRAW(inst.rs, inst.rd, pos);//for MEM instructions, all the source registers are ready at the end of the previous cycle.
-            if(!HasunisSW && !WAWhazard && !WAWhazard && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
+            if(!HasunisSW && !RAWhazard && buffers[PREMEM].size()<2 && inst.cycle<cycle)//structure hazard and in cycle
             {
                 preisqueue[pos].type = NIL; //delete pos at pre-issue buffer
                 
@@ -355,7 +364,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
             WAWhazard = ChkWAW(inst.rd, pos);
             RAWhazard = ChkRAW(inst.rs, inst.rt, pos);
             
-            if(!WAWhazard && !WAWhazard && !RAWhazard && buffers[PREALU].size()<2 && inst.cycle<cycle)
+            if(!WAWhazard && !WARhazard && !RAWhazard && buffers[PREALU].size()<2 && inst.cycle<cycle)
             {
                 preisqueue[pos].type = NIL; //delete pos at pre-issue buffer
                 
@@ -427,7 +436,7 @@ void SbInstSim::Exec_st()
     if(buffers[PREALUB].size()>0)
     {
         Inst inst = buffers[PREALUB].front();
-        if(inst.cycle+1 < cycle)
+        if(inst.cycle+1 < cycle)//ALUB takes 2 cycles
         {
             buffers[PREALUB].erase(buffers[PREALUB].begin());
             
@@ -512,8 +521,6 @@ void SbInstSim::WB_st()
 void SbInstSim::Run(InstDecoder &instdec)
 {
     bool isbreak = false;
-    //int ret = 0;
-    //int codeidx = 0;
     std::stringstream stepoutput;
     
     SetMem(instdec.GetDatas());
