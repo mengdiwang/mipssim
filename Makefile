@@ -1,5 +1,6 @@
 CC=g++
-CFLAGS=-c -Wall
+CFLAGS=-c #-DLF
+
 LDFLAGS=
 SOURCES=main.cpp instDecoder.cpp instSimulator.cpp sbplSimulator.cpp
 OBJECTS=$(SOURCES:.cpp=.o)

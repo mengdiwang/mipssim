@@ -19,8 +19,9 @@
 #include <iostream>
 #endif
 
-const std::string CR="\r\n";
-const std::string LR="\n";
+#define LF
+std::string CR="\r\n";
+
 void OStream(std::ostream &outs, int cycle, SbInstSim &sim);
 void SStream(std::stringstream &outs, int cycle, SbInstSim &sim);
 
@@ -254,7 +255,7 @@ bool SbInstSim::ChkRAW(int rj, int rk, int pos)
             return true;
         }
     }
- 
+    
     if((rj!=1024 && result[rj]!=NIL) || (rk!=1024 && result[rk]!=NIL))
         return true;
     
@@ -285,8 +286,8 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
     std::vector<Inst> &preisqueue = buffers[PREISSUE];
     
     switch (inst.type) {
-        
-        //ALUB
+            
+            //ALUB
         case SLL:
         case SRL:
         case SRA:
@@ -307,7 +308,7 @@ bool SbInstSim::Chkhzd(Inst inst, int pos)
             
             break;
             
-        //MEM
+            //MEM
         case LW://LW
             HasunisSW = ChkNoSW(pos);
             WARhazard = ChkWAR(inst.rd, pos);
@@ -384,7 +385,7 @@ void SbInstSim::ISSUE_st()
     {
         if(Chkhzd(preisqueue[i], i))
             issuecount ++;
-    
+        
         if(issuecount==2)
             break;
     }
@@ -411,7 +412,7 @@ void SbInstSim::Exec_st()
         if(inst.cycle < cycle)
         {
             buffers[PREALU].erase(buffers[PREALU].begin());
-        
+            
             int val;
             PLCodeExec(inst, val);
             
@@ -429,7 +430,7 @@ void SbInstSim::Exec_st()
         if(inst.cycle+1 < cycle)
         {
             buffers[PREALUB].erase(buffers[PREALUB].begin());
-        
+            
             int val;
             PLCodeExec(inst, val);
             
@@ -446,11 +447,11 @@ void SbInstSim::Exec_st()
         if(inst.cycle < cycle)
         {
             buffers[PREMEM].erase(buffers[PREMEM].begin());
-        
+            
             int val;
             PLCodeExec(inst, val);
             ExecData ed(inst.rd, val);
-        
+            
             if(inst.type == LW)
             {
                 postqueues[QPOSTMEM].push(ed);
@@ -527,9 +528,9 @@ void SbInstSim::Run(InstDecoder &instdec)
         if(!isbreak)
         {
             ISSUE_st();
-        
+            
             Exec_st();
-        
+            
             WB_st();
         }
         //---------------------------------------------------------
@@ -543,7 +544,7 @@ void SbInstSim::Run(InstDecoder &instdec)
         if(cycle > 1000)
             break;
 #endif
-        //---------------------------------------------------------        
+        //---------------------------------------------------------
         cycle ++;
     }
     output.append(stepoutput.str());
@@ -551,6 +552,10 @@ void SbInstSim::Run(InstDecoder &instdec)
 
 void SStream(std::stringstream &outs, int cycle, SbInstSim &sim)
 {
+#ifdef LF
+    CR="\n";
+#endif
+    
     outs << "--------------------" << CR;
     outs << "Cycle:"<< cycle << CR << CR;
     
@@ -672,6 +677,10 @@ void SStream(std::stringstream &outs, int cycle, SbInstSim &sim)
 
 void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
 {
+#ifdef LF
+    CR = "\n";
+#endif
+    
     outs << "--------------------" << CR;
     outs << "Cycle:"<< cycle << CR << CR;
     
@@ -680,14 +689,14 @@ void OStream(std::ostream &outs, int cycle, SbInstSim &sim)
     //if(sim.ifstate==1)
     //    outs<<  GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
     //if(sim.waitstr!="")
-        outs << sim.waitstr;
+    outs << sim.waitstr;
     outs << CR;
     
     outs << "\tExecuted Instruction: ";
     //if(sim.ifstate==2)
     //    outs<< GetCodeDisplaySb("", sim.buffers[IFUNIT][0], "");
     //if(sim.execstr!="")
-        outs << sim.execstr;
+    outs << sim.execstr;
     outs << CR;
     
     outs << "Pre-Issue Buffer:" << CR;
