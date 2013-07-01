@@ -3,9 +3,10 @@ mipssim
 
 This is the README for mipssim curriculum project2 pipelined MIPS
 -----------------------------------------------------------------
-Copyright by mengdi wang
+Copyright by Mengdi Wang, student No.51121500030
 
 mipssim is a curriculum project of Computer Architecture: Spring 2013 @ECNU
+This project is mainly realized by C/C++ codes.
 
 INSTALLATION
 ============
@@ -24,9 +25,9 @@ then make clean, make
 	
 running
 -------
-./MIPSsim input output
-+ input  : found input instruction files, e.g. sample.txt
-+ output : simulation.txt	
+./MIPSsim <input> <output>
+<input>  : found input instruction files, e.g. sample.txt
+<output> : output file name of the simulation, e.g. simulation.txt	
 
 Layout of the source tree
 =========================

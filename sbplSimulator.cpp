@@ -19,7 +19,7 @@
 #include <iostream>
 #endif
 
-#define LF
+//#define LF
 std::string CR="\r\n";
 
 void OStream(std::ostream &outs, int cycle, SbInstSim &sim);
